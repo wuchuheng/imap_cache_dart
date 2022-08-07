@@ -1,6 +1,6 @@
 name: imap_cache
 description: imap_cache is a data-driven caching library based on the IMAP protocol.
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/wuchuheng/imap_cache_dart
 
 environment:

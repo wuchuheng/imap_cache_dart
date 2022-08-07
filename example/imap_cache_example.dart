@@ -1,21 +1,3 @@
-`imap_cache` is a data-driven caching library based on the `IMAP` protocol.
-
-## Features
-
-* Data Cache
-* Timed synchronization
-* Related event subscriptions
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-to `/example` folder. 
-
-```dart
 import 'package:imap_cache/imap_cache.dart';
 
 void main() async {
@@ -62,16 +44,3 @@ void main() async {
       'Triggers an event when data synchronization is complete.'
   ) );
 }
-```
-
-## Contributing
-
-You can contribute in one of three ways:
-
-1. File bug reports using the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
-2. Answer questions or fix bugs on the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
-3. Contribute new features or update the wiki.
-
-## License
-
-MIT
