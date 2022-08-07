@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 /// 多路任务复用池
 class MultiplexTaskPool {

@@ -1,22 +1,10 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+`imap_cache` is a data-driven caching library based on the `IMAP` protocol.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+* Data Cache
+* Timed synchronization
+* Related event subscriptions
 
 ## Getting started
 
@@ -25,15 +13,40 @@ start using the package.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
 to `/example` folder. 
 
 ```dart
-const like = 'sample';
+import 'package:imap_cache/imap_cache.dart';
+
+void main() async {
+  final ImapCache cacheServiceInstance = await ImapCache().connectToServer(
+    userName: 'account@email.com',
+    password: 'email password',
+    imapServerHost: 'imap host',
+    imapServerPort: 993,
+    isImapServerSecure: true,
+    boxName: 'snotes',
+  );
+  // set Data
+  await cacheServiceInstance.set( key: 'foo', value: 'hello' );
+  // print: hello
+  print( await cacheServiceInstance.get(key: 'foo'));
+  // print: true
+  print(await cacheServiceInstance.has(key: 'foo'));
+  await cacheServiceInstance.unset(key: 'foo');
+  // print: false
+  print(await cacheServiceInstance.has(key: 'foo'));
+}
 ```
 
-## Additional information
+## Contributing
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+You can contribute in one of three ways:
+
+1. File bug reports using the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
+2. Answer questions or fix bugs on the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
+3. Contribute new features or update the wiki.
+
+## License
+
+MIT

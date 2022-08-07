@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:imap_cache/imap_cache.dart';
 import 'package:imap_cache/src/cache_io_abstract.dart';
 import 'package:imap_cache/src/cache_service_abstract.dart';
 import 'package:imap_cache/src/errors/not_found_imap_service_error.dart';
@@ -19,6 +18,7 @@ import 'local_cache_service/local_cache_service.dart';
 import 'subscription/unsubscribe.dart'; // for the utf8.encode method
 
 class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, SyncEventSubscriptionAbstract {
+  static late int _syncIntervalSeconds;
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
   final Map<String, Map<int, void Function(String value)>> _setEventCallbackList = {};
@@ -83,7 +83,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     } catch(e)  {
       rethrow;
     } finally {
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: _syncIntervalSeconds));
       Logger.info("Synchronization of completed data");
       _syncOnline().then((value) => {});
     }
@@ -97,7 +97,11 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     required int imapServerPort,
     required bool isImapServerSecure,
     required String boxName,
+    int syncIntervalSeconds = 5,
+    bool isShowLog = false,
   }) async {
+    _syncIntervalSeconds = syncIntervalSeconds;
+    Logger.isShowLog = isShowLog;
     String registerMailBox = '${boxName}_register';
     _registerService = await RegisterService().connectToServer(
         userName: userName,
