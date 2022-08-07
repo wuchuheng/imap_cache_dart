@@ -17,7 +17,10 @@ import 'package:imap_cache/src/utils/single_task_pool.dart';
 import 'local_cache_service/local_cache_service.dart';
 import 'subscription/unsubscribe.dart'; // for the utf8.encode method
 
-class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, SyncEventSubscriptionAbstract {
+class ImapCache implements ImapServiceAbstract,
+    SubscriptionFactoryAbstract,
+    SyncEventSubscriptionAbstract
+{
   static late int _syncIntervalSeconds;
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
@@ -25,6 +28,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
   final Map<int, void Function()> _startSyncEventList = {};
+  final Map<String,Map<int, Future<String> Function({required String onlineValue})> > beforeOnlineModifyLocalCallbackList = {};
   ImapService? _imapService;
   RegisterService? _registerService;
   RegisterService _getRegister() {
@@ -63,11 +67,13 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
           localRegisterInfo: localRegister,
           imapService: _getImapService(),
           key: key,
+          imapCache: this,
         );
         await SyncData.onlineExistAndLocalExist(
             onlineRegisterInfo: onlineRegister,
             localRegisterInfo: localRegister,
             imapService: _getImapService(),
+            imapCache: this,
             key: key);
         await SyncData.onlineNoneAndLocalExist(
             onlineRegisterInfo: onlineRegister,
@@ -189,6 +195,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   UnsubscribeAbstract startSyncEvent(void Function() callback) {
     int id = DateTime.now().microsecondsSinceEpoch;
     _startSyncEventList[id] = callback;
+
     return Unsubscription(() => _startSyncEventList.remove(id));
   }
 
@@ -197,6 +204,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     int id = DateTime.now().microsecondsSinceEpoch;
     if (_setEventCallbackList[key] ==  null) _setEventCallbackList[key] = {};
     _setEventCallbackList[key]![id] = callback;
+
     return Unsubscription(() => _setEventCallbackList[key]!.remove(id));
   }
 
@@ -205,6 +213,18 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     int id = DateTime.now().microsecondsSinceEpoch;
     if (_unsetEventCallbackList[key] ==  null)_unsetEventCallbackList[key] = {};
     _unsetEventCallbackList[key]![id] = callback;
+
     return Unsubscription(() =>_unsetEventCallbackList[key]!.remove(id));
+  }
+
+  @override
+  UnsubscribeAbstract beforeOnlineModifyLocalEvent({required String key, required Future<String> Function({required String onlineValue}) callback}) {
+    if (beforeOnlineModifyLocalCallbackList[key] == null) {
+      beforeOnlineModifyLocalCallbackList[key] = {};
+    }
+    int id = DateTime.now().microsecondsSinceEpoch;
+    beforeOnlineModifyLocalCallbackList[key]![id] = callback;
+
+    return Unsubscription(() =>  beforeOnlineModifyLocalCallbackList[key]!.remove(id));
   }
 }
