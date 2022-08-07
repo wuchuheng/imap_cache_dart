@@ -61,6 +61,11 @@ void main() async {
   cacheServiceInstance.completedSyncEvent(() => print(
       'Triggers an event when data synchronization is complete.'
   ) );
+  /// Listening to data synchronized online to offline
+  final beforeOnlineModifyLocalEventHandler = cacheServiceInstance.beforeOnlineModifyLocalEvent(key: 'tmptmp', callback: ({required String onlineValue}) async{
+    print(onlineValue);
+    return onlineValue;
+  });
 }
 ```
 
