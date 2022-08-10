@@ -9,3 +9,6 @@
 
 ## 0.0.4
 - Add a subscription event to listen for data synced online to offline
+
+## 0.0.5
+- Created respective local cache for the account.
