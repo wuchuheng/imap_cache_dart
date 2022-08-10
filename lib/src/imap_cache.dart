@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:imap_cache/src/cache_common_config.dart';
 import 'package:imap_cache/src/cache_io_abstract.dart';
 import 'package:imap_cache/src/cache_service_abstract.dart';
 import 'package:imap_cache/src/errors/not_found_imap_service_error.dart';
@@ -17,10 +18,7 @@ import 'package:imap_cache/src/utils/single_task_pool.dart';
 import 'local_cache_service/local_cache_service.dart';
 import 'subscription/unsubscribe.dart'; // for the utf8.encode method
 
-class ImapCache implements ImapServiceAbstract,
-    SubscriptionFactoryAbstract,
-    SyncEventSubscriptionAbstract
-{
+class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, SyncEventSubscriptionAbstract {
   static late int _syncIntervalSeconds;
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
@@ -28,15 +26,17 @@ class ImapCache implements ImapServiceAbstract,
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
   final Map<int, void Function()> _startSyncEventList = {};
-  final Map<String,Map<int, Future<String> Function({required String onlineValue})> > beforeOnlineModifyLocalCallbackList = {};
+  final Map<String, Map<int, Future<String> Function({required String onlineValue})>>
+      beforeOnlineModifyLocalCallbackList = {};
   ImapService? _imapService;
   RegisterService? _registerService;
   RegisterService _getRegister() {
     if (_registerService == null) throw NotFoundRegisterError();
     return _registerService!;
   }
+
   ImapService _getImapService() {
-    if (_imapService == null)  throw NotFoundImapServiceError();
+    if (_imapService == null) throw NotFoundImapServiceError();
     return _imapService!;
   }
 
@@ -44,7 +44,7 @@ class ImapCache implements ImapServiceAbstract,
   Future<void> _syncOnline() async {
     Logger.info("Start synchronizing data");
     try {
-      Future.wait([ _hookStartSyncEvent() ]);
+      Future.wait([_hookStartSyncEvent()]);
       // init onlineData
       RegisterService registerService = _getRegister();
       RegisterInfo? hasRegisterInfo = await registerService.hasRegister();
@@ -82,11 +82,11 @@ class ImapCache implements ImapServiceAbstract,
             key: key);
       }
       Logger.info('Completed data synchronization.');
-      Future.wait([ _hookCompletedSyncEvent() ]);
-    } on SocketException catch(e, stacktrace) {
+      Future.wait([_hookCompletedSyncEvent()]);
+    } on SocketException catch (e, stacktrace) {
       print(e);
       print(stacktrace);
-    } catch(e)  {
+    } catch (e) {
       rethrow;
     } finally {
       await Future.delayed(Duration(seconds: _syncIntervalSeconds));
@@ -96,7 +96,7 @@ class ImapCache implements ImapServiceAbstract,
   }
 
   /// connect to the IMAP server with user's account
-  Future<ImapCache> connectToServer( {
+  Future<ImapCache> connectToServer({
     required String userName,
     required String password,
     required String imapServerHost,
@@ -116,19 +116,18 @@ class ImapCache implements ImapServiceAbstract,
         imapServerPort: imapServerPort,
         isImapServerSecure: isImapServerSecure,
         boxName: boxName,
-        registerMailBox: registerMailBox
+        registerMailBox: registerMailBox);
+    _imapService = await ImapService(registerService: _getRegister()).connectToServer(
+      userName: userName,
+      password: password,
+      imapServerHost: imapServerHost,
+      imapServerPort: imapServerPort,
+      isImapServerSecure: isImapServerSecure,
+      boxName: boxName,
+      registerMailBox: registerMailBox,
+      registerService: _registerService!,
     );
-    _imapService = await ImapService(registerService: _getRegister())
-        .connectToServer(
-          userName: userName,
-          password: password,
-          imapServerHost: imapServerHost,
-          imapServerPort: imapServerPort,
-          isImapServerSecure: isImapServerSecure,
-          boxName: boxName,
-          registerMailBox: registerMailBox,
-          registerService: _registerService!,
-      );
+    CacheCommonConfig.userName = userName;
     await _limitSyncTaskPool.start(() async {
       if (!_isSyncing) {
         _isSyncing = true;
@@ -145,9 +144,13 @@ class ImapCache implements ImapServiceAbstract,
     required String value,
   }) async {
     await LocalCacheService().set(key: key, value: value);
-    Future.wait([ _hookSetEvents(key: key, value: value) ]);
+    Future.wait([_hookSetEvents(key: key, value: value)]);
   }
-  Future<void> _hookSetEvents({required String key, required String value,}) async {
+
+  Future<void> _hookSetEvents({
+    required String key,
+    required String value,
+  }) async {
     if (_setEventCallbackList[key] != null && _setEventCallbackList[key]!.isNotEmpty) {
       for (final callback in _setEventCallbackList[key]!.values) {
         callback(value);
@@ -160,6 +163,7 @@ class ImapCache implements ImapServiceAbstract,
     LocalCacheService().unset(key: key);
     Future.wait([_hookUnsetEvents(key: key)]);
   }
+
   Future<void> _hookUnsetEvents({required String key}) async {
     if (_unsetEventCallbackList[key] != null && _unsetEventCallbackList[key]!.isNotEmpty) {
       for (final callback in _unsetEventCallbackList[key]!.values) {
@@ -180,11 +184,13 @@ class ImapCache implements ImapServiceAbstract,
     _completeSyncEventList[id] = callback;
     return Unsubscription(() => _completeSyncEventList.remove(id));
   }
+
   Future<void> _hookCompletedSyncEvent() async {
     if (_completeSyncEventList.isNotEmpty) {
       _completeSyncEventList.forEach((_, value) => value());
     }
   }
+
   Future<void> _hookStartSyncEvent() async {
     if (_startSyncEventList.isNotEmpty) {
       _startSyncEventList.forEach((_, value) => value());
@@ -202,29 +208,31 @@ class ImapCache implements ImapServiceAbstract,
   @override
   UnsubscribeAbstract setEventSubscribe({required String key, required void Function(String value) callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
-    if (_setEventCallbackList[key] ==  null) _setEventCallbackList[key] = {};
+    if (_setEventCallbackList[key] == null) _setEventCallbackList[key] = {};
     _setEventCallbackList[key]![id] = callback;
 
     return Unsubscription(() => _setEventCallbackList[key]!.remove(id));
   }
 
   @override
-  UnsubscribeAbstract unsetEventSubscribe({required String key, required void Function({required String key}) callback}) {
+  UnsubscribeAbstract unsetEventSubscribe(
+      {required String key, required void Function({required String key}) callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
-    if (_unsetEventCallbackList[key] ==  null)_unsetEventCallbackList[key] = {};
+    if (_unsetEventCallbackList[key] == null) _unsetEventCallbackList[key] = {};
     _unsetEventCallbackList[key]![id] = callback;
 
-    return Unsubscription(() =>_unsetEventCallbackList[key]!.remove(id));
+    return Unsubscription(() => _unsetEventCallbackList[key]!.remove(id));
   }
 
   @override
-  UnsubscribeAbstract beforeOnlineModifyLocalEvent({required String key, required Future<String> Function({required String onlineValue}) callback}) {
+  UnsubscribeAbstract beforeOnlineModifyLocalEvent(
+      {required String key, required Future<String> Function({required String onlineValue}) callback}) {
     if (beforeOnlineModifyLocalCallbackList[key] == null) {
       beforeOnlineModifyLocalCallbackList[key] = {};
     }
     int id = DateTime.now().microsecondsSinceEpoch;
     beforeOnlineModifyLocalCallbackList[key]![id] = callback;
 
-    return Unsubscription(() =>  beforeOnlineModifyLocalCallbackList[key]!.remove(id));
+    return Unsubscription(() => beforeOnlineModifyLocalCallbackList[key]!.remove(id));
   }
 }

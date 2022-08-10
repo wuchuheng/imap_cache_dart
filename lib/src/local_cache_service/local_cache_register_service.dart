@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import 'package:imap_cache/src/cache_common_config.dart';
 import 'package:imap_cache/src/cache_io_abstract.dart';
 import 'package:imap_cache/src/utils/single_task_pool.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../imap_service/register_service_abstract.dart';
 
@@ -15,7 +16,7 @@ class LocalCacheRegisterService implements RegisterServiceAbstract {
 
   Future<File> _getFile() async {
     final directory = await getApplicationDocumentsDirectory();
-    final String path = '${directory.path}/cache/register';
+    final String path = '${directory.path}/cache/${CacheCommonConfig.userName}/register';
     String filePath = '$path/register.json';
     File file = File(filePath);
     if (!await file.exists()) {

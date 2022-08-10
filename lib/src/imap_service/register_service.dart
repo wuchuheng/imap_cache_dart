@@ -45,7 +45,7 @@ class RegisterService extends Common implements RegisterServiceAbstract {
       return res;
     } on NotFoundRegisterError {
       return null;
-    } catch(e) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -60,17 +60,15 @@ class RegisterService extends Common implements RegisterServiceAbstract {
       final client = await _getClient();
       final RegisterSubjectInfo? registerSubjectInfo = await _getUidForRegister(name: CacheCommonConfig.registerSymbol);
       if (registerSubjectInfo != null) {
-        if (previousRegisterHash != null &&
-            previousRegisterHash == registerSubjectInfo.hash) {
+        if (previousRegisterHash != null && previousRegisterHash == registerSubjectInfo.hash) {
           completer.complete(previousRegisterInfo!);
         } else {
           final data = await client.uidFetchMessage(registerSubjectInfo.uid, 'BODY[]');
           String? bodyJson = data.messages[0].decodeTextPlainPart();
           bodyJson = checkPlainText(bodyJson!);
           final Map<String, dynamic> body = jsonDecode(bodyJson);
-          RegisterInfo result = body.isNotEmpty
-              ? RegisterInfo.fromJson(bodyJson)
-              : RegisterInfo(uidMapKey: {}, data: {});
+          RegisterInfo result =
+              body.isNotEmpty ? RegisterInfo.fromJson(bodyJson) : RegisterInfo(uidMapKey: {}, data: {});
           previousRegisterHash = registerSubjectInfo.hash;
           previousRegisterInfo = result;
           completer.complete(result);
@@ -106,8 +104,7 @@ class RegisterService extends Common implements RegisterServiceAbstract {
         value: dataJson,
         client: client,
       );
-      if (res.matchingSequence != null &&
-          res.matchingSequence!.toList().isNotEmpty) {
+      if (res.matchingSequence != null && res.matchingSequence!.toList().isNotEmpty) {
         final uids = res.matchingSequence!.toList();
         for (final uid in uids) {
           final sequence = MessageSequence.fromId(uid, isUid: true);
@@ -122,10 +119,8 @@ class RegisterService extends Common implements RegisterServiceAbstract {
     required String name,
   }) async {
     final client = await _getClient();
-    final res = await client.uidSearchMessagesWithQuery(
-        SearchQueryBuilder.from(name, SearchQueryType.subject));
-    if (res.matchingSequence != null &&
-        res.matchingSequence!.toList().isNotEmpty) {
+    final res = await client.uidSearchMessagesWithQuery(SearchQueryBuilder.from(name, SearchQueryType.subject));
+    if (res.matchingSequence != null && res.matchingSequence!.toList().isNotEmpty) {
       final uids = res.matchingSequence!.toList();
       final data = await client.uidFetchMessages(
         MessageSequence.fromIds(uids, isUid: true),
@@ -168,7 +163,7 @@ class RegisterService extends Common implements RegisterServiceAbstract {
     this.imapServerHost = imapServerHost;
     this.imapServerPort = imapServerPort;
     this.isImapServerSecure = isImapServerSecure;
-    this.boxName  = boxName;
+    this.boxName = boxName;
     this.registerMailBox = registerMailBox;
     await _getClient();
     return this;

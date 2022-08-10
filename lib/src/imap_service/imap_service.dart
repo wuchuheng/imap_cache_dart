@@ -7,6 +7,7 @@ import 'package:imap_cache/src/imap_service/common.dart';
 import 'package:imap_cache/src/utils/hash.dart';
 import 'package:imap_cache/src/utils/single_task_pool.dart';
 import 'package:imap_cache/src/utils/task_pool.dart';
+
 import '../cache_service_abstract.dart';
 import '../errors/key_not_found_error.dart';
 import '../utils/logger.dart';
@@ -101,15 +102,13 @@ class ImapService extends Common implements ImapServiceAbstract {
     );
 
     int? lastUid;
-    if (res.matchingSequence != null &&
-        res.matchingSequence!.toList().isNotEmpty) {
+    if (res.matchingSequence != null && res.matchingSequence!.toList().isNotEmpty) {
       List<int> onlineUids = res.matchingSequence!.toList();
       onlineUids = onlineUids.where((e) => !uids.contains(e)).toList();
       int updatedAt = 0;
 
       for (var uid in onlineUids) {
-        FetchImapResult res = await client.uidFetchMessage(
-            uid, 'BODY.PEEK[HEADER.FIELDS (subject)]');
+        FetchImapResult res = await client.uidFetchMessage(uid, 'BODY.PEEK[HEADER.FIELDS (subject)]');
         String subject = res.messages[0].getHeaderValue('Subject')!;
         NameInfo nameInfo = decodeName(subject);
         if (nameInfo.name == key && nameInfo.timestamp > updatedAt) lastUid = uid;
@@ -144,10 +143,8 @@ class ImapService extends Common implements ImapServiceAbstract {
         int uid = register.data[key]!.uid;
         register.data[key]!.deletedAt = DateTime.now().toString();
         register.uidMapKey.remove(uid);
-        await Future.wait([
-          deleteMessageByUid(uid: uid, client: client),
-           _getRegisterService().setRegister(data: register)
-        ]);
+        await Future.wait(
+            [deleteMessageByUid(uid: uid, client: client), _getRegisterService().setRegister(data: register)]);
         Logger.info("online: complete unset key: $key.");
       } on ImapException catch (e) {
         throw UnsetError();
@@ -178,7 +175,7 @@ class ImapService extends Common implements ImapServiceAbstract {
     this.imapServerHost = imapServerHost;
     this.imapServerPort = imapServerPort;
     this.isImapServerSecure = isImapServerSecure;
-    this.boxName  = boxName;
+    this.boxName = boxName;
     this.registerMailBox = registerMailBox;
     await _getClient();
     return this;

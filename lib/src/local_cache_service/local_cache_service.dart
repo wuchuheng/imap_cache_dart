@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+
+import 'package:imap_cache/src/cache_common_config.dart';
 import 'package:imap_cache/src/errors/key_not_found_error.dart';
 import 'package:imap_cache/src/local_cache_service/local_cache_register_service.dart';
 import 'package:imap_cache/src/utils/logger.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../cache_io_abstract.dart';
 import '../cache_service_abstract.dart';
 import '../utils/hash.dart';
@@ -11,7 +14,7 @@ import '../utils/hash.dart';
 class LocalCacheService implements ImapServiceAbstract {
   Future<String> get _path async {
     final directory = await getApplicationDocumentsDirectory();
-    String path = '${directory.path}/cache/data';
+    String path = '${directory.path}/cache/${CacheCommonConfig.userName}/data';
     if (!await Directory(path).exists()) {
       await Directory(path).create(recursive: true);
     }
@@ -30,8 +33,7 @@ class LocalCacheService implements ImapServiceAbstract {
   @override
   Future<bool> has({required String key}) async {
     RegisterInfo registerInfo = await LocalCacheRegisterService().getRegister();
-    return registerInfo.data.containsKey(key) &&
-        registerInfo.data[key]!.deletedAt == null;
+    return registerInfo.data.containsKey(key) && registerInfo.data[key]!.deletedAt == null;
   }
 
   @override
