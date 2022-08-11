@@ -131,9 +131,9 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     await _limitSyncTaskPool.start(() async {
       if (!_isSyncing) {
         _isSyncing = true;
-        _syncOnline().then((value) => null);
+        _syncOnline();
       }
-    });
+    },);
 
     return this;
   }

@@ -12,3 +12,6 @@
 
 ## 0.0.5
 - Created respective local cache for the account.
+
+## 0.0.6
+- Created respective local cache for the account.
