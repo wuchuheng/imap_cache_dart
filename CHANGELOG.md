@@ -19,3 +19,6 @@
 ## 0.0.7
 - fix: Fixed an issue where a sudden unexpected interuption caused data errors when setting a value.
 _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connectory instance.
+  
+## 0.0.8
+- fix: Fixed an subscribe issue when the value be set.

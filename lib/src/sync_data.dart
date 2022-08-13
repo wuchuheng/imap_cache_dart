@@ -22,7 +22,7 @@ class SyncData {
     }
     String value = await imapService.get(key: key);
     value = await _beforeOnlineModifyLocalCallbackTrigger(imapCache: imapCache, key: key, value: value);
-    await LocalCacheService().set(key: key, value: value);
+    await imapCache.set(key: key, value: value);
     Logger.info('synchronization: online --> local. key: $key value: $value');
   }
 
@@ -64,10 +64,7 @@ class SyncData {
     if (onlineKeyUpdatedAt > localKeyUpdatedAt) {
       String value = await imapService.get(key: key);
       value = await _beforeOnlineModifyLocalCallbackTrigger(imapCache: imapCache, key: key, value: value);
-      await LocalCacheService().set(
-        key: key,
-        value: value,
-      );
+      await imapCache.set(key: key, value: value);
       Logger.info('synchronization: online --> local. key: $key value: $value');
     } else {
       String value = await LocalCacheService().get(key: key);
