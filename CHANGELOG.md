@@ -15,3 +15,7 @@
 
 ## 0.0.6
 - Created respective local cache for the account.
+
+## 0.0.7
+- fix: Fixed an issue where a sudden unexpected interuption caused data errors when setting a value.
+_ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connectory instance.

@@ -19,10 +19,13 @@ import 'local_cache_service/local_cache_service.dart';
 import 'subscription/unsubscribe.dart'; // for the utf8.encode method
 
 class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, SyncEventSubscriptionAbstract {
+  bool hasLocalCache = false;
+  bool hasOnlineCache = false;
   static late int _syncIntervalSeconds;
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
-  final Map<String, Map<int, void Function(String value)>> _setEventCallbackList = {};
+  final Map<String, Map<int, void Function(String value)>> _beforeSetCallbackList = {};
+  final Map<String, Map<int, void Function(String value)>> _afterSetCallbackList = {};
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
   final Map<int, void Function()> _startSyncEventList = {};
@@ -128,12 +131,17 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
       registerService: _registerService!,
     );
     CacheCommonConfig.userName = userName;
-    await _limitSyncTaskPool.start(() async {
-      if (!_isSyncing) {
-        _isSyncing = true;
-        _syncOnline();
-      }
-    },);
+    hasLocalCache = await LocalCacheRegisterService().hasLocalCache();
+    final RegisterInfo? register = await _registerService!.hasRegister();
+    hasOnlineCache = register != null;
+    await _limitSyncTaskPool.start(
+      () async {
+        if (!_isSyncing) {
+          _isSyncing = true;
+          _syncOnline();
+        }
+      },
+    );
 
     return this;
   }
@@ -143,16 +151,28 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     required String key,
     required String value,
   }) async {
+    Future.wait([_hookBeforeSetEvents(key: key, value: value)]);
     await LocalCacheService().set(key: key, value: value);
-    Future.wait([_hookSetEvents(key: key, value: value)]);
+    Future.wait([_hookAfterSetEvents(key: key, value: value)]);
   }
 
-  Future<void> _hookSetEvents({
+  Future<void> _hookAfterSetEvents({
     required String key,
     required String value,
   }) async {
-    if (_setEventCallbackList[key] != null && _setEventCallbackList[key]!.isNotEmpty) {
-      for (final callback in _setEventCallbackList[key]!.values) {
+    if (_afterSetCallbackList[key] != null && _afterSetCallbackList[key]!.isNotEmpty) {
+      for (final callback in _afterSetCallbackList[key]!.values) {
+        callback(value);
+      }
+    }
+  }
+
+  Future<void> _hookBeforeSetEvents({
+    required String key,
+    required String value,
+  }) async {
+    if (_beforeSetCallbackList[key] != null && _beforeSetCallbackList[key]!.isNotEmpty) {
+      for (final callback in _beforeSetCallbackList[key]!.values) {
         callback(value);
       }
     }
@@ -206,12 +226,21 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }
 
   @override
-  UnsubscribeAbstract setEventSubscribe({required String key, required void Function(String value) callback}) {
+  UnsubscribeAbstract beforeSetSubscribe({required String key, required void Function(String value) callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
-    if (_setEventCallbackList[key] == null) _setEventCallbackList[key] = {};
-    _setEventCallbackList[key]![id] = callback;
+    if (_beforeSetCallbackList[key] == null) _beforeSetCallbackList[key] = {};
+    _beforeSetCallbackList[key]![id] = callback;
 
-    return Unsubscription(() => _setEventCallbackList[key]!.remove(id));
+    return Unsubscription(() => _beforeSetCallbackList[key]!.remove(id));
+  }
+
+  @override
+  UnsubscribeAbstract afterSetSubscribe({required String key, required void Function(String value) callback}) {
+    int id = DateTime.now().microsecondsSinceEpoch;
+    if (_afterSetCallbackList[key] == null) _afterSetCallbackList[key] = {};
+    _afterSetCallbackList[key]![id] = callback;
+
+    return Unsubscription(() => _afterSetCallbackList[key]!.remove(id));
   }
 
   @override

@@ -73,10 +73,6 @@ class ImapService extends Common implements ImapServiceAbstract {
       await write(name: key, value: value, client: client);
       RegisterInfo register = await registerService.getRegister();
       int? lastUid = await getLastUid(key: key, registerInfo: register);
-      if (register.data[key]?.uid != null) {
-        int? removeId = register.data[key]?.uid;
-        register.uidMapKey.remove(removeId!);
-      }
       register.uidMapKey[lastUid!] = key;
       register.data[key] = RegisterItemInfo(
         lastUpdatedAt: DateTime.now().toString(),
@@ -84,6 +80,10 @@ class ImapService extends Common implements ImapServiceAbstract {
         hash: Hash.convertStringToHash(value),
       );
       await _getRegisterService().setRegister(data: register);
+      if (register.data[key]?.uid != null) {
+        int? removeId = register.data[key]?.uid;
+        register.uidMapKey.remove(removeId!);
+      }
     });
   }
 

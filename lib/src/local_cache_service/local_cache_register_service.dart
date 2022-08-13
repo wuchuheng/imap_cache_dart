@@ -13,10 +13,19 @@ import '../imap_service/register_service_abstract.dart';
 class LocalCacheRegisterService implements RegisterServiceAbstract {
   static RegisterInfo? _data;
   static SingleTaskPool singleTaskPool = SingleTaskPool.builder();
-
-  Future<File> _getFile() async {
+  Future<String> _getDirectPath() async {
     final directory = await getApplicationDocumentsDirectory();
     final String path = '${directory.path}/cache/${CacheCommonConfig.userName}/register';
+    return path;
+  }
+
+  Future<bool> hasLocalCache() async {
+    String directPath = await _getDirectPath();
+    return await Directory(directPath).exists();
+  }
+
+  Future<File> _getFile() async {
+    final path = await _getDirectPath();
     String filePath = '$path/register.json';
     File file = File(filePath);
     if (!await file.exists()) {
