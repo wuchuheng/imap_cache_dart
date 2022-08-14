@@ -24,7 +24,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   static late int _syncIntervalSeconds;
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
-  final Map<String, Map<int, void Function(String value)>> _beforeSetCallbackList = {};
+  final Map<String, Map<int, BeforeSetCallback>> _beforeSetCallbackList = {};
   final Map<String, Map<int, void Function(String value)>> _afterSetCallbackList = {};
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
@@ -151,7 +151,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     required String key,
     required String value,
   }) async {
-    Future.wait([_hookBeforeSetEvents(key: key, value: value)]);
+    await _hookBeforeSetEvents(key: key, value: value);
     await LocalCacheService().set(key: key, value: value);
     Future.wait([_hookAfterSetEvents(key: key, value: value)]);
   }
@@ -167,15 +167,17 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     }
   }
 
-  Future<void> _hookBeforeSetEvents({
+  Future<String> _hookBeforeSetEvents({
     required String key,
     required String value,
   }) async {
     if (_beforeSetCallbackList[key] != null && _beforeSetCallbackList[key]!.isNotEmpty) {
-      for (final callback in _beforeSetCallbackList[key]!.values) {
-        callback(value);
+      for (final BeforeSetCallback callback in _beforeSetCallbackList[key]!.values) {
+        value = await callback(value);
       }
     }
+
+    return value;
   }
 
   @override
@@ -226,7 +228,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }
 
   @override
-  UnsubscribeAbstract beforeSetSubscribe({required String key, required void Function(String value) callback}) {
+  UnsubscribeAbstract beforeSetSubscribe({required String key, required BeforeSetCallback callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
     if (_beforeSetCallbackList[key] == null) _beforeSetCallbackList[key] = {};
     _beforeSetCallbackList[key]![id] = callback;

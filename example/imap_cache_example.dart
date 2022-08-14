@@ -25,10 +25,13 @@ void main() async {
 
   /// event subscription usage.
   final setSubscribeHandle = cacheServiceInstance.beforeSetSubscribe(
-      key: 'foo',
-      callback: (value) {
-        print('the value have been set. key: foo; value: $value');
-      });
+    key: 'foo',
+    callback: (value) async {
+      print('the value have been set. key: foo; value: $value');
+      value = 'hello, $value ';
+      return value;
+    },
+  );
 
   ///  Trigger setting events after set the foo variables
   await cacheServiceInstance.set(key: 'foo', value: 'hello');
