@@ -4,11 +4,11 @@ abstract class UnsubscribeAbstract {
 
 abstract class SubscriptionAbstract {}
 
-typedef BeforeSetCallback = Future<String> Function(String value);
+typedef BeforeSetCallback = Future<String> Function({required String key, required String value});
 
 abstract class SubscriptionFactoryAbstract {
   UnsubscribeAbstract beforeSetSubscribe({
-    required String key,
+    String? key,
     required BeforeSetCallback callback,
   });
   UnsubscribeAbstract afterSetSubscribe({required String key, required void Function(String value) callback});

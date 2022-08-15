@@ -26,7 +26,7 @@ void main() async {
   /// event subscription usage.
   final setSubscribeHandle = cacheServiceInstance.beforeSetSubscribe(
     key: 'foo',
-    callback: (value) async {
+    callback: ({required key, required value}) async {
       print('the value have been set. key: foo; value: $value');
       value = 'hello, $value ';
       return value;

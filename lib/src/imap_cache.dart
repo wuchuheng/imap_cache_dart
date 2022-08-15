@@ -25,6 +25,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   final SingleTaskPool _limitSyncTaskPool = SingleTaskPool();
   bool _isSyncing = false;
   final Map<String, Map<int, BeforeSetCallback>> _beforeSetCallbackList = {};
+  final Map<int, BeforeSetCallback> _globalBeforeSetCallbackList = {};
   final Map<String, Map<int, void Function(String value)>> _afterSetCallbackList = {};
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
@@ -151,7 +152,8 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     required String key,
     required String value,
   }) async {
-    await _hookBeforeSetEvents(key: key, value: value);
+    value = await _hookGlobalBeforeSetEvents(key: key, value: value);
+    value = await _hookBeforeSetEvents(key: key, value: value);
     await LocalCacheService().set(key: key, value: value);
     Future.wait([_hookAfterSetEvents(key: key, value: value)]);
   }
@@ -167,13 +169,26 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     }
   }
 
+  Future<String> _hookGlobalBeforeSetEvents({
+    required String key,
+    required String value,
+  }) async {
+    if (_globalBeforeSetCallbackList.isNotEmpty) {
+      for (final id in _globalBeforeSetCallbackList.keys) {
+        value = await _globalBeforeSetCallbackList[id]!(key: key, value: value);
+      }
+    }
+
+    return value;
+  }
+
   Future<String> _hookBeforeSetEvents({
     required String key,
     required String value,
   }) async {
     if (_beforeSetCallbackList[key] != null && _beforeSetCallbackList[key]!.isNotEmpty) {
       for (final BeforeSetCallback callback in _beforeSetCallbackList[key]!.values) {
-        value = await callback(value);
+        value = await callback(key: key, value: value);
       }
     }
 
@@ -228,12 +243,17 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }
 
   @override
-  UnsubscribeAbstract beforeSetSubscribe({required String key, required BeforeSetCallback callback}) {
+  UnsubscribeAbstract beforeSetSubscribe({String? key, required BeforeSetCallback callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
-    if (_beforeSetCallbackList[key] == null) _beforeSetCallbackList[key] = {};
-    _beforeSetCallbackList[key]![id] = callback;
+    if (key != null) {
+      if (_beforeSetCallbackList[key] == null) _beforeSetCallbackList[key] = {};
+      _beforeSetCallbackList[key]![id] = callback;
 
-    return Unsubscription(() => _beforeSetCallbackList[key]!.remove(id));
+      return Unsubscription(() => _beforeSetCallbackList[key]!.remove(id));
+    } else {
+      _globalBeforeSetCallbackList[id] = callback;
+      return Unsubscription(() => _globalBeforeSetCallbackList.remove(id));
+    }
   }
 
   @override
