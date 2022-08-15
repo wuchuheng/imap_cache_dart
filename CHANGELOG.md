@@ -28,3 +28,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.10
 - refactor: refactoring the subscribed  evnets of setting.
+
+## 0.0.11
+- refactor: refactoring afterSetEvent.

@@ -26,7 +26,8 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   bool _isSyncing = false;
   final Map<String, Map<int, BeforeSetCallback>> _beforeSetCallbackList = {};
   final Map<int, BeforeSetCallback> _globalBeforeSetCallbackList = {};
-  final Map<String, Map<int, void Function(String value)>> _afterSetCallbackList = {};
+  final Map<String, Map<int, AfterSetCallback>> _afterSetCallbackList = {};
+  final Map<int, AfterSetCallback> _globalAfterSetCallbackList = {};
   final Map<String, Map<int, void Function({required String key})>> _unsetEventCallbackList = {};
   final Map<int, void Function()> _completeSyncEventList = {};
   final Map<int, void Function()> _startSyncEventList = {};
@@ -155,7 +156,18 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     value = await _hookGlobalBeforeSetEvents(key: key, value: value);
     value = await _hookBeforeSetEvents(key: key, value: value);
     await LocalCacheService().set(key: key, value: value);
-    Future.wait([_hookAfterSetEvents(key: key, value: value)]);
+    _hookAfterSetEvents(key: key, value: value);
+    _hookGlobalAfterSetEvents(key: key, value: value);
+  }
+
+  Future<void> _hookGlobalAfterSetEvents({
+    required String key,
+    required String value,
+  }) async {
+    final keys = _globalAfterSetCallbackList.keys;
+    for (final id in keys) {
+      _globalAfterSetCallbackList[id]!(key: key, value: value);
+    }
   }
 
   Future<void> _hookAfterSetEvents({
@@ -164,7 +176,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }) async {
     if (_afterSetCallbackList[key] != null && _afterSetCallbackList[key]!.isNotEmpty) {
       for (final callback in _afterSetCallbackList[key]!.values) {
-        callback(value);
+        callback(value: value, key: key);
       }
     }
   }
@@ -257,12 +269,17 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }
 
   @override
-  UnsubscribeAbstract afterSetSubscribe({required String key, required void Function(String value) callback}) {
+  UnsubscribeAbstract afterSetSubscribe({String? key, required AfterSetCallback callback}) {
     int id = DateTime.now().microsecondsSinceEpoch;
-    if (_afterSetCallbackList[key] == null) _afterSetCallbackList[key] = {};
-    _afterSetCallbackList[key]![id] = callback;
+    if (key != null) {
+      if (_afterSetCallbackList[key] == null) _afterSetCallbackList[key] = {};
+      _afterSetCallbackList[key]![id] = callback;
 
-    return Unsubscription(() => _afterSetCallbackList[key]!.remove(id));
+      return Unsubscription(() => _afterSetCallbackList[key]!.remove(id));
+    } else {
+      _globalAfterSetCallbackList[id] = callback;
+      return Unsubscription(() => _globalAfterSetCallbackList.remove(id));
+    }
   }
 
   @override
