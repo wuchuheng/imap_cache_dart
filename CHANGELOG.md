@@ -31,3 +31,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.11
 - refactor: refactoring afterSetEvent.
+
+## 0.0.12
+- fix: fix the issue that synchronization event caused by time resolution error.
+
