@@ -2,7 +2,7 @@ import 'package:imap_cache/src/cache_io_abstract.dart';
 import 'package:imap_cache/src/imap_service/imap_service.dart';
 import 'package:imap_cache/src/local_cache_service/local_cache_service.dart';
 import 'package:imap_cache/src/utils/logger.dart';
-import 'package:imap_cache/src/utils/timer.dart';
+import 'package:imap_cache/src/utils/timer_util.dart';
 
 import '../imap_cache.dart';
 

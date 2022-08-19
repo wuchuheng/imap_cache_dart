@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:imap_cache/src/cache_common_config.dart';
+import 'package:imap_cache/src/dao/local_sqlite.dart';
 import 'package:imap_cache/src/errors/key_not_found_error.dart';
 import 'package:imap_cache/src/local_cache_service/local_cache_register_service.dart';
 import 'package:imap_cache/src/utils/logger.dart';
@@ -9,9 +10,15 @@ import 'package:path_provider/path_provider.dart';
 
 import '../cache_io_abstract.dart';
 import '../cache_service_abstract.dart';
-import '../utils/hash.dart';
 
 class LocalCacheService implements ImapServiceAbstract {
+  late LocalSQLite _localSQLite;
+
+  init({required String userName}) async {
+    _localSQLite = await LocalSQLite().init(userName: userName);
+    return this;
+  }
+
   Future<String> get _path async {
     final directory = await getApplicationDocumentsDirectory();
     String path = '${directory.path}/cache/${CacheCommonConfig.userName}/data';
@@ -31,26 +38,12 @@ class LocalCacheService implements ImapServiceAbstract {
   }
 
   @override
-  Future<bool> has({required String key}) async {
-    RegisterInfo registerInfo = await LocalCacheRegisterService().getRegister();
-    return registerInfo.data.containsKey(key) && registerInfo.data[key]!.deletedAt == null;
-  }
+  Future<bool> has({required String key}) async => _localSQLite.cacheInfoDao().has(key: key) != null;
 
   @override
   Future<void> set({required String key, required String value}) async {
     Logger.info('Start setting up local cache. key: $key value: $value');
-    String path = await _path;
-    String filePath = '$path/$key.json';
-    File file = File(filePath);
-    await file.writeAsString(value);
-    Logger.info('Successfully put $key in $filePath.');
-    RegisterInfo registerData = await LocalCacheRegisterService().getRegister();
-    registerData.data[key] = RegisterItemInfo(
-      lastUpdatedAt: DateTime.now().toString(),
-      uid: 0,
-      hash: Hash.convertStringToHash(value),
-    );
-    LocalCacheRegisterService().setRegister(data: registerData);
+    _localSQLite.cacheInfoDao().set(key: key, value: value);
     Logger.info('Complete local cache settings. key $key value: $value');
   }
 

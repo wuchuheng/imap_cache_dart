@@ -14,11 +14,13 @@ import 'package:imap_cache/src/subscription/sync_event_subscription_abstract.dar
 import 'package:imap_cache/src/sync_data.dart';
 import 'package:imap_cache/src/utils/logger.dart';
 import 'package:imap_cache/src/utils/single_task_pool.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 import 'local_cache_service/local_cache_service.dart';
 import 'subscription/unsubscribe.dart'; // for the utf8.encode method
 
 class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, SyncEventSubscriptionAbstract {
+  late LocalCacheService _localCacheService;
   bool hasLocalCache = false;
   bool hasOnlineCache = false;
   static late int _syncIntervalSeconds;
@@ -100,6 +102,14 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     }
   }
 
+  static Database? _db;
+  static Database getDb() {
+    if (_db == null) {
+      throw Error();
+    }
+    return _db!;
+  }
+
   /// connect to the IMAP server with user's account
   Future<ImapCache> connectToServer({
     required String userName,
@@ -111,6 +121,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
     int syncIntervalSeconds = 5,
     bool isShowLog = false,
   }) async {
+    _localCacheService = await LocalCacheService().init(userName: userName);
     _syncIntervalSeconds = syncIntervalSeconds;
     Logger.isShowLog = isShowLog;
     String registerMailBox = '${boxName}_register';
@@ -140,7 +151,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
       () async {
         if (!_isSyncing) {
           _isSyncing = true;
-          _syncOnline();
+          // _syncOnline();
         }
       },
     );
@@ -155,7 +166,7 @@ class ImapCache implements ImapServiceAbstract, SubscriptionFactoryAbstract, Syn
   }) async {
     value = await _hookGlobalBeforeSetEvents(key: key, value: value);
     value = await _hookBeforeSetEvents(key: key, value: value);
-    await LocalCacheService().set(key: key, value: value);
+    _localCacheService.set(key: key, value: value);
     _hookAfterSetEvents(key: key, value: value);
     _hookGlobalAfterSetEvents(key: key, value: value);
   }

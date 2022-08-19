@@ -16,7 +16,7 @@ start using the package.
 to `/example` folder. 
 
 ```dart
-import 'package:imap_cache/imap_cache.dart';
+import 'package:imap_cache/index.dart';
 
 void main() async {
   final ImapCache cacheServiceInstance = await ImapCache().connectToServer(
