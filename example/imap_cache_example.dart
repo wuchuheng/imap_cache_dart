@@ -23,44 +23,18 @@ void main() async {
   /// print: false
   print(await cacheServiceInstance.has(key: 'foo'));
 
-  /// event subscription usage.
-  final setSubscribeHandle = cacheServiceInstance.beforeSetSubscribe(
-    key: 'foo',
-    callback: ({required key, required value}) async {
-      print('the value have been set. key: foo; value: $value');
-      value = 'hello, $value ';
-      return value;
-    },
-  );
-
   ///  Trigger setting events after set the foo variables
   await cacheServiceInstance.set(key: 'foo', value: 'hello');
-  final unsetSubscribeHandle = cacheServiceInstance.unsetEventSubscribe(
+  final unsetSubscribeHandle = cacheServiceInstance.beforeSet(
       key: 'foo',
-      callback: ({required key}) {
-        print('the value have been deleted. key: $key.');
+      callback: ({required String key, required String value, required String hash}) async {
+        return 'new value';
       });
 
   ///  Trigger unseting events after delete the foo variables
   await cacheServiceInstance.unset(key: 'foo');
 
   /// Unsubscribe from events for foo key
-  setSubscribeHandle.unsubscribe();
   unsetSubscribeHandle.unsubscribe();
-
-  /// Data synchronization events
-  /// Triggers an event when the online data and offline data start to synchronize.
-  cacheServiceInstance
-      .startSyncEvent(() => print('Triggers an event when the online data and offline data start to synchronize.'));
-
-  /// Triggers an event when data synchronization is complete.
-  cacheServiceInstance.completedSyncEvent(() => print('Triggers an event when data synchronization is complete.'));
-
-  /// Listening to data synchronized online to offline
-  final beforeOnlineModifyLocalEventHandler = cacheServiceInstance.beforeOnlineModifyLocalEvent(
-      key: 'tmptmp',
-      callback: ({required String onlineValue}) async {
-        print(onlineValue);
-        return onlineValue;
-      });
+  unsetSubscribeHandle.unsubscribe();
 }

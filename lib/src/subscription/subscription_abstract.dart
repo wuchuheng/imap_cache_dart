@@ -2,17 +2,14 @@ abstract class UnsubscribeAbstract {
   void unsubscribe();
 }
 
-abstract class SubscriptionAbstract {}
+typedef BeforeSetCallback = Future<String> Function({required String key, required String value, required String hash});
+typedef AfterSetCallback = Future<void> Function({required String key, required String value, required String hash});
+typedef BeforeUnsetCallback = Future<bool> Function({required String key});
+typedef AfterUnsetCallback = Future<void> Function({required String key});
 
-typedef BeforeSetCallback = Future<String> Function({required String key, required String value});
-typedef AfterSetCallback = void Function({required String key, required String value});
-
-abstract class SubscriptionFactoryAbstract {
-  UnsubscribeAbstract beforeSetSubscribe({
-    String? key,
-    required BeforeSetCallback callback,
-  });
-  UnsubscribeAbstract afterSetSubscribe({String? key, required AfterSetCallback callback});
-  UnsubscribeAbstract unsetEventSubscribe(
-      {required String key, required void Function({required String key}) callback});
+abstract class SubscriptionAbstract {
+  UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback});
+  UnsubscribeAbstract afterSet({String? key, required AfterSetCallback callback});
+  UnsubscribeAbstract beforeUnset({String? key, required BeforeUnsetCallback callback});
+  UnsubscribeAbstract afterUnset({String? key, required AfterUnsetCallback callback});
 }

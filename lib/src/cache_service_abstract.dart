@@ -5,6 +5,5 @@ abstract class ImapServiceAbstract {
 
   Future<void> unset({required String key});
 
-  // todo 这里的Future<bool> --> Future<String>
-  Future<bool> has({required String key});
+  Future<String?> has({required String key});
 }

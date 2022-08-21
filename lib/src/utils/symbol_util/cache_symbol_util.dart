@@ -5,6 +5,7 @@ class CacheSymbolUtil {
   static final _splitSymbol = '#';
 
   DateTime updatedAt;
+  DateTime? deletedAt;
   String key;
   String hash = '';
   String value;
@@ -13,13 +14,15 @@ class CacheSymbolUtil {
     required this.updatedAt,
     required this.key,
     required this.value,
+    this.deletedAt,
   });
 
   /// Generate a symbol for the persistent cache
   @override
   String toString() {
-    final hash = Hash.convertStringToHash(value);
-    return '$_prefix$_splitSymbol$key$_splitSymbol${updatedAt.microsecondsSinceEpoch}$_splitSymbol$hash';
+    hash = Hash.convertStringToHash(value);
+    final deletedAtSymbol = deletedAt != null ? deletedAt!.microsecondsSinceEpoch : '';
+    return '$_prefix$_splitSymbol$key$_splitSymbol${updatedAt.microsecondsSinceEpoch}$_splitSymbol$hash$_splitSymbol$deletedAtSymbol';
   }
 
   CacheSymbolUtil.fromSymbol(String symbol)
@@ -30,5 +33,6 @@ class CacheSymbolUtil {
     key = listStr[1];
     updatedAt = DateTime.fromMicrosecondsSinceEpoch(int.parse(listStr[2]));
     hash = listStr[3];
+    if (listStr[4].isNotEmpty) deletedAt = DateTime.fromMicrosecondsSinceEpoch(int.parse(listStr[4]));
   }
 }

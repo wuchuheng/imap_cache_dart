@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:imap_cache/src/dao/cache_info_dao/index.dart';
+import 'package:imap_cache/src/dao/online_cache_info_dao/index.dart';
+import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../model/cache_info_model/index.dart';
-import '../model/config_model/index.dart';
 
 class LocalSQLite {
   Database? _db;
@@ -28,26 +29,30 @@ class LocalSQLite {
       db.execute('''
       CREATE TABLE "${CacheInfoModel.tableName}" (
         "key" TEXT NOT NULL,
-        "uid" INTEGER,
+        "uid" INTEGER NOT NULL,
         "value" TEXT,
         "hash" TEXT,
         "symbol" TEXT,
         "updated_at" DATE,
         "deleted_at" DATE,
-        PRIMARY KEY ("key")
+        PRIMARY KEY ("key", "uid")
       );
   ''');
     }
-    final hasConfigTable = getDb().select(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='${ConfigModel.tableName}'",
+    final hasOnlineCacheInfoTable = getDb().select(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='${OnlineCacheInfoModel.tableName}'",
     );
-    if (hasConfigTable.isEmpty) {
+    if (hasOnlineCacheInfoTable.isEmpty) {
       final db = getDb();
       db.execute('''
-      CREATE TABLE "${ConfigModel.tableName}" (
-        "id" INTEGER NOT NULL,
+      CREATE TABLE "${OnlineCacheInfoModel.tableName}" (
+        "key" TEXT NOT NULL,
+        "uid" INTEGER NOT NULL,
+        "hash" TEXT,
+        "symbol" TEXT,
         "updated_at" DATE,
-        PRIMARY KEY ("id")
+        "deleted_at" DATE,
+        PRIMARY KEY ("key", "uid")
       );
   ''');
     }
@@ -56,4 +61,6 @@ class LocalSQLite {
   }
 
   CacheInfoDao cacheInfoDao() => CacheInfoDao(db: getDb());
+
+  OnlineCacheInfoDao onlineCacheInfoDao() => OnlineCacheInfoDao(db: getDb());
 }

@@ -1,9 +1,9 @@
 import 'package:imap_cache/src/subscription/subscription_abstract.dart';
 
-class Unsubscription implements UnsubscribeAbstract {
+class Unsubscribe implements UnsubscribeAbstract {
   final void Function() _unsubscribe;
 
-  Unsubscription(this._unsubscribe);
+  Unsubscribe(this._unsubscribe);
 
   @override
   void unsubscribe() => _unsubscribe();
