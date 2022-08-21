@@ -8,12 +8,35 @@
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Depend on it
+Run this command:
+
+With Dart:
+
+``` bash 
+$ dart pub add imap_cache
+```
+With Flutter:
+
+``` bash 
+$ flutter pub add imap_cache
+```
+
+This will add a line like this to your package's pubspec.yaml (and run an implicit dart pub get):
+
+``` yaml 
+dependencies:
+  imap_cache: ^0.0.13
+```
+
+Alternatively, your editor might support dart pub get or flutter pub get. Check the docs for your editor to learn more.
+
+Import it
+Now in your Dart code, you can use:
+
+import ` 'package:imap_cache/imap_cache.dart'`;
 
 ## Usage
-
-to `/example` folder. 
 
 ```dart
 import 'package:imap_cache/index.dart';
