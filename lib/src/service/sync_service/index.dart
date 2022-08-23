@@ -34,8 +34,8 @@ class SyncService {
     _imapDirectoryService = imapDirectoryService;
     if (!await _imapDirectoryService.exists()) {
       await _imapDirectoryService.create();
+      await Future.delayed(Duration(seconds: 3));
     }
-    await Future.delayed(Duration(seconds: 3));
   }
 
   /// Start synchronizing data
