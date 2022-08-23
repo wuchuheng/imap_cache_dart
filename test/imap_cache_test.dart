@@ -16,6 +16,7 @@ void main() {
 
     final file = '${Directory.current.path}/test/.env';
     final env = Load(file: file).env;
+    late ImapCacheServiceAbstract imapCache;
     test('Connect Test', () async {
       final config = ConnectConfig(
         isDebug: env['IS_DEBUG']!.toLowerCase() == 'true',
@@ -27,8 +28,13 @@ void main() {
         boxName: env['BOX_NAME']!,
         localCacheDirectory: env['LOCAL_CACHE_DIRECTORY']!,
       );
-      ImapCacheServiceAbstract imapCache = await ImapCache().connectToServer(config);
-      await Future.delayed(Duration(seconds: 50));
+      imapCache = await ImapCache().connectToServer(config);
+    });
+    test('Set Test', () async {
+      await imapCache.set(key: 'hello', value: 'hello');
+    });
+    test('Duration', () async {
+      await Future.delayed(Duration(seconds: 20));
     });
   });
 }
