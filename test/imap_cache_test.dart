@@ -18,6 +18,7 @@ void main() {
     final env = Load(file: file).env;
     test('Connect Test', () async {
       final config = ConnectConfig(
+        isDebug: env['IS_DEBUG']!.toLowerCase() == 'true',
         userName: env['USER_NAME']!,
         password: env['PASSWORD']!,
         imapServerHost: env['HOST']!,
@@ -27,6 +28,7 @@ void main() {
         localCacheDirectory: env['LOCAL_CACHE_DIRECTORY']!,
       );
       ImapCacheServiceAbstract imapCache = await ImapCache().connectToServer(config);
+      await Future.delayed(Duration(seconds: 50));
     });
   });
 }
