@@ -39,17 +39,17 @@ class SyncService {
   }
 
   /// Start synchronizing data
-  Future<void> start() {
+  Future<void> start() async {
     Completer<void> completer = Completer();
+    if (!_isInit) {
+      await _init(_config);
+      _isInit = true;
+      completer.complete();
+      await _imapDirectoryService.selectPath();
+    }
     (() async {
       while (true) {
         try {
-          if (!_isInit) {
-            await _init(_config);
-            _isInit = true;
-            completer.complete();
-            await _imapDirectoryService.selectPath();
-          }
           await OnlineSyncToLocalService(
             imapDirectoryService: _imapDirectoryService,
             localSQLite: _localSQLite,
