@@ -15,9 +15,14 @@ class LocalSQLite {
     return _db!;
   }
 
-  init({required String userName}) async {
-    final directory = await getApplicationDocumentsDirectory();
-    String path = '${directory.path}/localCache/$userName';
+  init({required String userName, String? localCacheDirectory}) async {
+    String directory;
+    if (localCacheDirectory != null) {
+      directory = localCacheDirectory;
+    } else {
+      directory = (await getApplicationDocumentsDirectory()).path;
+    }
+    String path = '$directory/localCache/$userName';
     final file = '$path/sqlite3.so';
     if (!await Directory(path).exists()) await Directory(path).create(recursive: true);
     _db = sqlite3.open(file);

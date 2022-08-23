@@ -4,10 +4,10 @@ import 'package:imap_cache/src/dao/local_sqlite.dart';
 import 'package:imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
-import '../../cache_service_abstract.dart';
 import '../../utils/symbol_util/cache_symbol_util.dart';
+import '../imap_cache_service/cache_abstract.dart';
 
-class LocalCacheService implements ImapServiceAbstract {
+class LocalCacheService implements CacheAbstract {
   final LocalSQLite _localSQLite;
 
   LocalCacheService(this._localSQLite);

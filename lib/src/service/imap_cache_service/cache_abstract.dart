@@ -1,4 +1,4 @@
-abstract class ImapServiceAbstract {
+abstract class CacheAbstract {
   Future<String> get({required String key});
 
   Future<void> set({required String key, required String value});

@@ -27,11 +27,7 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
   Future<bool> create({int retryCount = 0}) async {
     final client = await _imapClientService.getClient();
     try {
-      if (!await exists()) {
-        await client.createMailbox(path);
-      } else {
-        return true;
-      }
+      await client.createMailbox(path);
     } on ImapException catch (e) {
       String expectMessage = 'Unable to find just created mailbox with the path [$path]. Please report this problem.';
       if (retryCount < 5 && e.message == expectMessage) {

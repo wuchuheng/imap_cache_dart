@@ -1,21 +1,21 @@
-import 'package:imap_cache/imap_cache.dart';
 import 'package:imap_cache/src/dto/subject_info.dart';
 import 'package:imap_cache/src/model/cache_info_model/index.dart';
 import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';
+import '../imap_cache_service/index.dart';
 import '../imap_directory_service/index.dart';
 
 class OnlineSyncToLocalService {
   late ImapDirectoryService _imapDirectoryService;
   late LocalSQLite _localSQLite;
-  late ImapCache _imapCache;
+  late ImapCacheService _imapCache;
 
   OnlineSyncToLocalService({
     required ImapDirectoryService imapDirectoryService,
     required LocalSQLite localSQLite,
-    required ImapCache imapCache,
+    required ImapCacheService imapCache,
   }) {
     _imapCache = imapCache;
     _imapDirectoryService = imapDirectoryService;
