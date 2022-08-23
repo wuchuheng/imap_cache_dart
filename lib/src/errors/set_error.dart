@@ -1,0 +1,1 @@
+class ConnectError extends Error {}

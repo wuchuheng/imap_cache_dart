@@ -23,7 +23,7 @@ class OnlineCacheInfoDao implements OnlineCacheInfoDaoAbstract {
         `uid`= ?
         WHERE key ='${onlineCacheInfo.key}'
       ''', [
-        onlineCacheInfo.key,
+        onlineCacheInfo.hash,
         onlineCacheInfo.symbol,
         onlineCacheInfo.updatedAt.toString(),
         onlineCacheInfo.deletedAt?.toString(),
