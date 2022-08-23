@@ -1,1 +1,1 @@
-class ConnectError extends Error {}
+class SetError extends Error {}

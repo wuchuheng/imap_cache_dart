@@ -2,16 +2,19 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'index.g.dart';
 
-enum DateType { CONNECT }
+enum DateType {
+  CONNECT,
+  SET,
+}
 
 @JsonSerializable()
 class IsolateRequest {
   final DateType dateType;
-  final String data;
+  final String payload;
 
   IsolateRequest({
     required this.dateType,
-    required this.data,
+    required this.payload,
   });
 
   factory IsolateRequest.fromJson(Map<String, dynamic> json) {

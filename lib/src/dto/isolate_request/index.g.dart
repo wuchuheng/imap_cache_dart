@@ -9,15 +9,16 @@ part of 'index.dart';
 IsolateRequest _$IsolateRequestFromJson(Map<String, dynamic> json) =>
     IsolateRequest(
       dateType: $enumDecode(_$DateTypeEnumMap, json['dateType']),
-      data: json['data'] as String,
+      payload: json['payload'] as String,
     );
 
 Map<String, dynamic> _$IsolateRequestToJson(IsolateRequest instance) =>
     <String, dynamic>{
       'dateType': _$DateTypeEnumMap[instance.dateType]!,
-      'data': instance.data,
+      'payload': instance.payload,
     };
 
 const _$DateTypeEnumMap = {
   DateType.CONNECT: 'CONNECT',
+  DateType.SET: 'SET',
 };

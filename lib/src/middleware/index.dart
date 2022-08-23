@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:imap_cache/src/dto/connect_config/index.dart';
+import 'package:imap_cache/src/dto/isolate_payload/index.dart';
 import 'package:imap_cache/src/dto/isolate_response/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
@@ -17,6 +18,8 @@ Future<IsolateCallback> IsolateMiddleware() async {
   return (IsolateRequest isolateData) async {
     ReceivePort responseReceivePort = ReceivePort();
     sendPort.send([jsonEncode(isolateData), responseReceivePort.sendPort]);
+
+    /// TODO: 订阅类型要采用for 监听数据变化和相关解除订阅操作
     String response = await responseReceivePort.first;
     Map<String, dynamic> jsonMap = jsonDecode(response);
     return IsolateResponse.fromJson(jsonMap);
@@ -32,24 +35,37 @@ void heavyComputationTask(SendPort sendPort) async {
       final jsonStr = message[0];
       Map<String, dynamic> jsonMap = jsonDecode(jsonStr);
       final IsolateRequest requestData = IsolateRequest.fromJson(jsonMap);
-      switch (requestData.dateType) {
-        case DateType.CONNECT:
-          connectToServer(message[1], requestData, imapCacheService);
-          break;
+      try {
+        switch (requestData.dateType) {
+          case DateType.CONNECT:
+            connectToServer(message[1], requestData, imapCacheService);
+            break;
+          case DateType.SET:
+            onSet(message[1], requestData, imapCacheService);
+            break;
+        }
+      } catch (e) {
+        message[1].send(jsonEncode(IsolateResponse(isSuccess: false, error: e.toString())));
       }
     }
   }
 }
 
+Future<void> onSet(SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
+  final payload = IsolatePayload.fromJson(jsonDecode(isolateRequest.payload));
+  await imapCacheService.set(key: payload.key, value: payload.value!);
+  final response = IsolateResponse(isSuccess: true);
+  sendPort.send(jsonEncode(response));
+}
+
 Future connectToServer(
-    SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
-  final config = ConnectConfig.fromJson(jsonDecode(isolateRequest.data));
+  SendPort sendPort,
+  IsolateRequest isolateRequest,
+  ImapCacheServiceAbstract imapCacheService,
+) async {
+  final config = ConnectConfig.fromJson(jsonDecode(isolateRequest.payload));
   late IsolateResponse response;
-  try {
-    await imapCacheService.connectToServer(config);
-    response = IsolateResponse(isSuccess: true);
-  } catch (e) {
-    response = IsolateResponse(isSuccess: false, error: e.toString());
-  }
+  await imapCacheService.connectToServer(config);
+  response = IsolateResponse(isSuccess: true);
   sendPort.send(jsonEncode(response));
 }
