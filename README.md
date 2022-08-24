@@ -43,12 +43,12 @@ import 'package:imap_cache/index.dart';
 
 void main() async {
   final ImapCache cacheServiceInstance = await ImapCache().connectToServer(
-    userName: 'my email account',
-    password: 'password',
-    imapServerHost: 'imap host',
-    imapServerPort: 993,
-    isImapServerSecure: true,
-    boxName: 'snotes',
+    userName: '<email account>',
+    password: '<password>',
+    imapServerHost: '<imap host>',
+    imapServerPort: 993, // host port 
+    isImapServerSecure: true, // tls
+    boxName: 'snotes', // box name
   );
   /// set Data
   await cacheServiceInstance.set( key: 'foo', value: 'hello' );
