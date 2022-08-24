@@ -79,8 +79,12 @@ class ImapCache implements ImapCacheServiceAbstract {
   }
 
   @override
-  Future<void> unset({required String key}) {
-    // TODO: implement unset
-    throw UnimplementedError();
+  Future<void> unset({required String key}) async {
+    final payload = IsolatePayload(key: key);
+    final response = await isolateMiddleware(IsolateRequest(dateType: DateType.UNSET, payload: jsonEncode(payload)));
+    if (!response.isSuccess) {
+      Logger.error(response.error ?? '');
+      throw SetError();
+    }
   }
 }

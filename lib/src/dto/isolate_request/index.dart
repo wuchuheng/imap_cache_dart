@@ -6,6 +6,7 @@ enum DateType {
   CONNECT,
   SET,
   GET,
+  UNSET,
 }
 
 @JsonSerializable()

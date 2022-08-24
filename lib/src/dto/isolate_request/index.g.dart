@@ -22,4 +22,5 @@ const _$DateTypeEnumMap = {
   DateType.CONNECT: 'CONNECT',
   DateType.SET: 'SET',
   DateType.GET: 'GET',
+  DateType.UNSET: 'UNSET',
 };

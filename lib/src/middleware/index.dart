@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:imap_cache/src/dto/connect_config/index.dart';
-import 'package:imap_cache/src/dto/isolate_payload/index.dart';
 import 'package:imap_cache/src/dto/isolate_response/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
+import 'package:imap_cache/src/utils/isolate_util.dart';
 
 import '../dto/isolate_request/index.dart';
 
@@ -46,6 +46,9 @@ void heavyComputationTask(SendPort sendPort) async {
           case DateType.GET:
             onGet(message[1], requestData, imapCacheService);
             break;
+          case DateType.UNSET:
+            onUnset(message[1], requestData, imapCacheService);
+            break;
         }
       } catch (e) {
         message[1].send(jsonEncode(IsolateResponse(isSuccess: false, error: e.toString())));
@@ -54,17 +57,28 @@ void heavyComputationTask(SendPort sendPort) async {
   }
 }
 
+Future<void> onUnset(
+  SendPort sendPort,
+  IsolateRequest isolateRequest,
+  ImapCacheServiceAbstract imapCacheService,
+) async {
+  final payload = decodePayload(isolateRequest);
+  await imapCacheService.unset(key: payload.key);
+  final response = IsolateResponse(isSuccess: true);
+  sendResponse(sendPort, response);
+}
+
 Future<void> onGet(SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
-  final payload = IsolatePayload.fromJson(jsonDecode(isolateRequest.payload));
+  final payload = decodePayload(isolateRequest);
   final response = IsolateResponse(isSuccess: true, data: await imapCacheService.get(key: payload.key));
   sendPort.send(jsonEncode(response));
 }
 
 Future<void> onSet(SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
-  final payload = IsolatePayload.fromJson(jsonDecode(isolateRequest.payload));
+  final payload = decodePayload(isolateRequest);
   await imapCacheService.set(key: payload.key, value: payload.value!);
   final response = IsolateResponse(isSuccess: true);
-  sendPort.send(jsonEncode(response));
+  sendResponse(sendPort, response);
 }
 
 Future connectToServer(
@@ -76,5 +90,5 @@ Future connectToServer(
   late IsolateResponse response;
   await imapCacheService.connectToServer(config);
   response = IsolateResponse(isSuccess: true);
-  sendPort.send(jsonEncode(response));
+  sendResponse(sendPort, response);
 }
