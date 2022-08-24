@@ -5,6 +5,7 @@ part 'index.g.dart';
 enum DateType {
   CONNECT,
   SET,
+  GET,
 }
 
 @JsonSerializable()

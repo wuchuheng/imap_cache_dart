@@ -52,9 +52,14 @@ class ImapCache implements ImapCacheServiceAbstract {
   }
 
   @override
-  Future<String> get({required String key}) {
-    // TODO: implement get
-    throw UnimplementedError();
+  Future<String> get({required String key}) async {
+    final payload = IsolatePayload(key: key);
+    final response = await isolateMiddleware(IsolateRequest(dateType: DateType.GET, payload: jsonEncode(payload)));
+    if (!response.isSuccess) {
+      Logger.error(response.error ?? '');
+      throw SetError();
+    }
+    return response.data!;
   }
 
   @override

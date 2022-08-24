@@ -21,4 +21,5 @@ Map<String, dynamic> _$IsolateRequestToJson(IsolateRequest instance) =>
 const _$DateTypeEnumMap = {
   DateType.CONNECT: 'CONNECT',
   DateType.SET: 'SET',
+  DateType.GET: 'GET',
 };
