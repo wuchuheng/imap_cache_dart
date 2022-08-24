@@ -2,6 +2,7 @@ import 'package:imap_cache/src/dao/cache_info_dao/cache_info_dao_util.dart';
 import 'package:imap_cache/src/dao/cache_info_dao/index_abstract.dart';
 import 'package:imap_cache/src/model/cache_info_model/index.dart';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 class CacheInfoDao implements CacheInfoDaoAbstract {
   final Database _db;
@@ -11,7 +12,8 @@ class CacheInfoDao implements CacheInfoDaoAbstract {
   @override
   CacheInfoModel? findByKey({required String key}) {
     String tableName = CacheInfoModel.tableName;
-    final ResultSet result = _db.select("select * from $tableName where `key` = ? Limit 1", [key]);
+    final sql = "select * from `$tableName` where `key` = '$key' AND deleted_at is null Limit 1 ";
+    final ResultSet result = _db.select(sql);
     if (result.isNotEmpty) {
       final Row row = result[0];
       return CacheInfoDaoUtil.rowConvertCacheInfoModel(row);
@@ -25,23 +27,19 @@ class CacheInfoDao implements CacheInfoDaoAbstract {
     final hasCacheInfo = findByKey(key: cacheInfo.key);
     final tableName = CacheInfoModel.tableName;
     if (hasCacheInfo != null) {
-      _db.execute('''
+      String deletedAt = cacheInfo.deletedAt != null ? "'${cacheInfo.deletedAt!.toString()}'" : 'null';
+      final sql = '''
       UPDATE $tableName SET 
-        `value` = ?,
-        `hash` = ?,
-        `symbol` = ?,
-        `updated_at` = ?,
-        `deleted_at` = ?,
-        `uid` = ?
-        WHERE key ='${cacheInfo.key}'
-      ''', [
-        cacheInfo.value,
-        cacheInfo.hash,
-        cacheInfo.symbol,
-        cacheInfo.updatedAt.toString(),
-        cacheInfo.deletedAt?.toString(),
-        cacheInfo.uid,
-      ]);
+        `value` = '${cacheInfo.value}',
+        `hash` = '${cacheInfo.hash}',
+        `symbol` = '${cacheInfo.symbol}',
+        `updated_at` = '${cacheInfo.updatedAt}',
+        `deleted_at` = $deletedAt,
+        `uid` = ${cacheInfo.uid}
+        WHERE `key` = '${cacheInfo.key}'
+      ''';
+      _db.execute(sql);
+      Logger.info('SQL: $sql');
     } else {
       _db.execute('''
       INSERT INTO $tableName (

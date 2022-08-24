@@ -62,8 +62,7 @@ void heavyComputationTask(SendPort sendPort) async {
 
 Future<void> onHas(SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
   final payload = decodePayload(isolateRequest);
-  await imapCacheService.has(key: payload.key);
-  final response = IsolateResponse(isSuccess: true);
+  final response = IsolateResponse(isSuccess: true, data: await imapCacheService.has(key: payload.key));
   sendResponse(sendPort, response);
 }
 
