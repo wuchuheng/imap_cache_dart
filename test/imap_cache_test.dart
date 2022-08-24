@@ -39,6 +39,9 @@ void main() {
       final result = await imapCache.get(key: key);
       expect(result, value);
     });
+    test('Unset Test', () async {
+      await imapCache.unset(key: key);
+    });
     test('Duration', () async {
       await Future.delayed(Duration(seconds: 20));
     });
