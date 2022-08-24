@@ -5,6 +5,7 @@ import 'package:imap_cache/src/dto/isolate_payload/index.dart';
 import 'package:imap_cache/src/middleware/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:imap_cache/src/subscription/subscription_abstract.dart';
+import 'package:imap_cache/src/subscription/subscription_imp.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import 'dto/connect_config/index.dart';
@@ -14,6 +15,7 @@ import 'errors/set_error.dart';
 
 class ImapCache implements ImapCacheServiceAbstract {
   late IsolateCallback isolateMiddleware;
+  late SubscriptionImp _subscriptionImp;
 
   @override
   Future<ImapCacheServiceAbstract> connectToServer(ConnectConfig config) async {
@@ -47,8 +49,7 @@ class ImapCache implements ImapCacheServiceAbstract {
 
   @override
   UnsubscribeAbstract beforeUnset({String? key, required BeforeUnsetCallback callback}) {
-    // TODO: implement beforeUnset
-    throw UnimplementedError();
+    return _subscriptionImp.beforeUnset(key: key, callback: callback);
   }
 
   @override
