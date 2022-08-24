@@ -49,12 +49,22 @@ void heavyComputationTask(SendPort sendPort) async {
           case DateType.UNSET:
             onUnset(message[1], requestData, imapCacheService);
             break;
+          case DateType.HAS:
+            onHas(message[1], requestData, imapCacheService);
+            break;
         }
       } catch (e) {
         message[1].send(jsonEncode(IsolateResponse(isSuccess: false, error: e.toString())));
       }
     }
   }
+}
+
+Future<void> onHas(SendPort sendPort, IsolateRequest isolateRequest, ImapCacheServiceAbstract imapCacheService) async {
+  final payload = decodePayload(isolateRequest);
+  await imapCacheService.has(key: payload.key);
+  final response = IsolateResponse(isSuccess: true);
+  sendResponse(sendPort, response);
 }
 
 Future<void> onUnset(

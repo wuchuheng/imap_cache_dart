@@ -7,6 +7,7 @@ enum DateType {
   SET,
   GET,
   UNSET,
+  HAS,
 }
 
 @JsonSerializable()
