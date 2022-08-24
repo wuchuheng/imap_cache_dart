@@ -30,8 +30,14 @@ void main() {
       );
       imapCache = await ImapCache().connectToServer(config);
     });
+    final key = 'hello';
+    final value = 'hello';
     test('Set Test', () async {
-      await imapCache.set(key: 'hello', value: 'hello');
+      await imapCache.set(key: key, value: value);
+    });
+    test('Get Test', () async {
+      final result = await imapCache.get(key: key);
+      expect(result, value);
     });
     test('Duration', () async {
       await Future.delayed(Duration(seconds: 20));
