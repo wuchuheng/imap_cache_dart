@@ -5,45 +5,50 @@ import 'package:imap_cache/src/dto/connect_config/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:test/test.dart';
 import 'package:wuchuheng_env/wuchuheng_env.dart';
+import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 void main() {
   group('A group of tests', () {
-    // final awesome = Awesome();
-
-    setUp(() {
-      // Additional setup goes here.
-    });
-
-    final file = '${Directory.current.path}/test/.env';
-    final env = Load(file: file).env;
     late ImapCacheServiceAbstract imapCache;
-    test('Connect Test', () async {
+    final key = 'hello';
+    final value = 'hello';
+    test('Init', () async {
+      final file = '${Directory.current.path}/test/.env';
+      DotEnv(file: file);
+      final directory = DotEnv.get('LOCAL_CACHE_DIRECTORY', '');
+      final path = '$directory/localCache';
+      if (await Directory(path).exists()) {
+        await Directory(path).delete(recursive: true);
+        Logger.info('the directory $path has been deleted');
+      }
       final config = ConnectConfig(
-        isDebug: env['IS_DEBUG']!.toLowerCase() == 'true',
-        userName: env['USER_NAME']!,
-        password: env['PASSWORD']!,
-        imapServerHost: env['HOST']!,
-        imapServerPort: int.parse(env['PORT']!),
-        isImapServerSecure: env['TLS']!.toLowerCase() == 'true',
-        boxName: env['BOX_NAME']!,
-        localCacheDirectory: env['LOCAL_CACHE_DIRECTORY']!,
+        isDebug: DotEnv.get('IS_DEBUG', true),
+        userName: DotEnv.get('USER_NAME', ''),
+        password: DotEnv.get('PASSWORD', ''),
+        imapServerHost: DotEnv.get('HOST', ''),
+        imapServerPort: int.parse(DotEnv.get('PORT', '')),
+        isImapServerSecure: DotEnv.get('TLS', true),
+        boxName: DotEnv.get('BOX_NAME', ''),
+        localCacheDirectory: DotEnv.get('LOCAL_CACHE_DIRECTORY', ''),
       );
       imapCache = await ImapCache().connectToServer(config);
     });
-    final key = 'hello';
-    final value = 'hello';
-    test('Set Test', () async {
+    test('SET GET Test', () async {
       await imapCache.set(key: key, value: value);
+      expect(await imapCache.get(key: key), value);
     });
-    test('Get Test', () async {
-      final result = await imapCache.get(key: key);
-      expect(result, value);
+    test('Has Test', () async {
+      expect(await imapCache.has(key: key), value);
+      String? result = await imapCache.has(key: 'noneKey');
+      expect(result, isNull);
     });
     test('Unset Test', () async {
       await imapCache.unset(key: key);
+      expect(await imapCache.has(key: key), isNull);
     });
+
     test('Duration', () async {
-      await Future.delayed(Duration(seconds: 20));
+      // await Future.delayed(Duration(seconds: 20));
     });
   });
 }
