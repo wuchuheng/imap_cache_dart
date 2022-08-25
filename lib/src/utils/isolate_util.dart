@@ -9,3 +9,8 @@ import '../dto/isolate_payload/index.dart';
 decodePayload(IsolateRequest isolateRequest) => IsolatePayload.fromJson(jsonDecode(isolateRequest.payload));
 
 sendResponse(SendPort sendPort, IsolateResponse response) => sendPort.send(jsonEncode(response));
+
+Future<IsolateResponse> receiveToResponse(ReceivePort receivePort) async {
+  Map<String, dynamic> jsonMap = jsonDecode(await receivePort.first);
+  return IsolateResponse.fromJson(jsonMap);
+}

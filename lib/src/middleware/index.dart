@@ -9,20 +9,20 @@ import 'package:imap_cache/src/utils/isolate_util.dart';
 
 import '../dto/isolate_request/index.dart';
 
-typedef IsolateCallback = Future<IsolateResponse> Function(IsolateRequest isolateData);
+typedef IsolateCallback = ReceivePort Function(IsolateRequest isolateData);
 
 Future<IsolateCallback> IsolateMiddleware() async {
   ReceivePort receivePort = ReceivePort();
   Isolate.spawn<SendPort>(heavyComputationTask, receivePort.sendPort);
   SendPort sendPort = await receivePort.first;
-  return (IsolateRequest isolateData) async {
+  return (IsolateRequest isolateData) {
     ReceivePort responseReceivePort = ReceivePort();
     sendPort.send([jsonEncode(isolateData), responseReceivePort.sendPort]);
 
     /// TODO: 订阅类型要采用for 监听数据变化和相关解除订阅操作
-    String response = await responseReceivePort.first;
-    Map<String, dynamic> jsonMap = jsonDecode(response);
-    return IsolateResponse.fromJson(jsonMap);
+    return responseReceivePort;
+    // Map<String, dynamic> jsonMap = jsonDecode(response);
+    // return IsolateResponse.fromJson(jsonMap);
   };
 }
 
