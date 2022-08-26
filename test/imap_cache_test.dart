@@ -45,10 +45,22 @@ void main() {
       String? result = await imapCache.has(key: 'noneKey');
       expect(result, isNull);
     });
-    test('Unset Test', () async {
+    test('Unset and beforeUnset Test', () async {
+      bool callback1 = false;
+      bool callback2 = false;
+      imapCache.beforeUnset(callback: ({required String key}) async {
+        callback1 = true;
+        return true;
+      });
+      imapCache.beforeUnset(callback: ({required String key}) async {
+        callback2 = true;
+        return true;
+      });
       await imapCache.unset(key: key);
       expect(await imapCache.has(key: key), isNull);
-    });
+      expect(callback1, isTrue);
+      expect(callback2, isTrue);
+    }, timeout: Timeout(Duration(seconds: 60)));
     test('Duration', () async {
       await Future.delayed(Duration(seconds: 5));
     });
