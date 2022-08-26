@@ -33,9 +33,12 @@ void main() {
       );
       imapCache = await ImapCache().connectToServer(config);
     });
-    test('SET GET Test', () async {
+    test('SET Test', () async {
       await imapCache.set(key: key, value: value);
-      expect(await imapCache.get(key: key), value);
+    });
+    test('GET Test', () async {
+      final result = await imapCache.get(key: key);
+      expect(result, value);
     });
     test('Has Test', () async {
       expect(await imapCache.has(key: key), value);
@@ -46,9 +49,8 @@ void main() {
       await imapCache.unset(key: key);
       expect(await imapCache.has(key: key), isNull);
     });
-
     test('Duration', () async {
-      // await Future.delayed(Duration(seconds: 20));
+      await Future.delayed(Duration(seconds: 5));
     });
   });
 }

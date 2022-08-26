@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'index.g.dart';
 
-enum DateType {
+enum DataType {
   CONNECT,
   SET,
   GET,
@@ -12,7 +12,7 @@ enum DateType {
 
 @JsonSerializable()
 class IsolateRequest {
-  final DateType dateType;
+  final DataType dateType;
   final String payload;
 
   IsolateRequest({
