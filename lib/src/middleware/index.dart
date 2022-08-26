@@ -46,23 +46,30 @@ Future<Task> middleware() async {
         channel.send(value);
         break;
       case ChannelName.beforeUnset:
-        if (!beforeUnsetChannelId.contains(channel.channelId)) {
-          beforeUnsetChannelId.add(channel.channelId);
-          channel.onClose((name) => beforeUnsetChannelId.remove(channel.channelId));
-          imapCacheService.beforeUnset(
-            key: message.isEmpty ? null : message,
-            callback: ({required String key}) async {
-              final boolSubject = SubjectHook<bool>();
-              channel.listen((message, channel) {
-                final result = ResultData.fromJson(jsonDecode(message));
-                boolSubject.next(result.result);
-              });
-              channel.send(key);
-              return await boolSubject.toFuture();
-            },
-          );
-        }
+        onBeforeUnset(channel, imapCacheService, message);
         break;
     }
   });
+}
+
+void onBeforeUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  if (!beforeUnsetChannelId.contains(channel.channelId)) {
+    beforeUnsetChannelId.add(channel.channelId);
+    final subscribe = imapCacheService.beforeUnset(
+      key: message.isEmpty ? null : message,
+      callback: ({required String key}) async {
+        final boolSubject = SubjectHook<bool>();
+        channel.listen((message, channel) {
+          final result = ResultData.fromJson(jsonDecode(message));
+          boolSubject.next(result.result);
+        });
+        channel.send(key);
+        return await boolSubject.toFuture();
+      },
+    );
+    channel.onClose((name) {
+      subscribe.unsubscribe();
+      beforeUnsetChannelId.remove(channel.channelId);
+    });
+  }
 }
