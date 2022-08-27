@@ -46,3 +46,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.16
 - chore: changed package name.
+
+## 0.0.17
+- chore: updated homepage.
