@@ -49,3 +49,9 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.17
 - chore: updated homepage.
+
+## 0.0.18
+- fix: fix the issue of exception not being thrown in isolate.
+
+## 0.0.19
+- fix: fix the issue of not handling errors.
