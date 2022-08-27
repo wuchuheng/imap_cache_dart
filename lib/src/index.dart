@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:imap_cache/src/dto/before_unset/result_data/index.dart';
-import 'package:imap_cache/src/dto/callback_data/index.dart';
-import 'package:imap_cache/src/dto/channel_name.dart';
-import 'package:imap_cache/src/dto/set_data/index.dart';
-import 'package:imap_cache/src/middleware/index.dart';
-import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
-import 'package:imap_cache/src/subscription/subscription_abstract.dart';
-import 'package:imap_cache/src/subscription/unsubscribe.dart';
+import 'package:wuchuheng_imap_cache/src/dto/before_unset/result_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/dto/callback_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
+import 'package:wuchuheng_imap_cache/src/dto/set_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/middleware/index.dart';
+import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 
 import 'dto/connect_config/index.dart';

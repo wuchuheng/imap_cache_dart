@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:imap_cache/src/dto/connect_config/index.dart';
-import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
-import 'package:imap_cache/src/service/local_cache_service/local_cache_service.dart';
-import 'package:imap_cache/src/subscription/subscription_abstract.dart';
-import 'package:imap_cache/src/subscription/subscription_imp.dart';
+import 'package:wuchuheng_imap_cache/src/dto/connect_config/index.dart';
+import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
+import 'package:wuchuheng_imap_cache/src/service/local_cache_service/local_cache_service.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';

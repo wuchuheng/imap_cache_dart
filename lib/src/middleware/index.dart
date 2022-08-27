@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:imap_cache/src/dto/before_unset/result_data/index.dart';
-import 'package:imap_cache/src/dto/callback_data/index.dart';
-import 'package:imap_cache/src/dto/channel_name.dart';
-import 'package:imap_cache/src/dto/set_data/index.dart';
-import 'package:imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
+import 'package:wuchuheng_imap_cache/src/dto/before_unset/result_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/dto/callback_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
+import 'package:wuchuheng_imap_cache/src/dto/set_data/index.dart';
+import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 
 import '../dto/connect_config/index.dart';

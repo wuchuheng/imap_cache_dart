@@ -1,6 +1,6 @@
-import 'package:imap_cache/src/dao/online_cache_info_dao/index_abstract.dart';
-import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:wuchuheng_imap_cache/src/dao/online_cache_info_dao/index_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 
 import 'online_cache_info_dao_util.dart';
 

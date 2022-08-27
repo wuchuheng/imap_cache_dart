@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:imap_cache/src/dao/local_sqlite.dart';
-import 'package:imap_cache/src/model/cache_info_model/index.dart';
+import 'package:wuchuheng_imap_cache/src/dao/local_sqlite.dart';
+import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../utils/symbol_util/cache_symbol_util.dart';

@@ -1,6 +1,6 @@
-import 'package:imap_cache/src/dto/subject_info.dart';
-import 'package:imap_cache/src/model/cache_info_model/index.dart';
-import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
+import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
+import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
+import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';

@@ -1,4 +1,4 @@
-import 'package:imap_cache/src/subscription/subscription_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 
 class Unsubscribe implements UnsubscribeAbstract {
   final void Function() _unsubscribe;

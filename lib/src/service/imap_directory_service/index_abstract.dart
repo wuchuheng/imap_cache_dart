@@ -1,4 +1,4 @@
-import 'package:imap_cache/src/dto/subject_info.dart';
+import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
 
 abstract class ImapDirectoryServiceAbstract {
   Future<bool> exists();

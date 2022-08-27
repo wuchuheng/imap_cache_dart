@@ -1,6 +1,4 @@
-import 'package:imap_cache/imap_cache.dart';
-import 'package:imap_cache/src/dto/connect_config/index.dart';
-import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
+import 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart';
 
 void main() async {
   final config = ConnectConfig(

@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:imap_cache/src/dao/cache_info_dao/index.dart';
-import 'package:imap_cache/src/dao/online_cache_info_dao/index.dart';
-import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:wuchuheng_imap_cache/src/dao/cache_info_dao/index.dart';
+import 'package:wuchuheng_imap_cache/src/dao/online_cache_info_dao/index.dart';
+import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 
 import '../model/cache_info_model/index.dart';
 

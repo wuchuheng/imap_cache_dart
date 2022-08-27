@@ -1,4 +1,4 @@
-`imap_cache` is a data-driven caching library based on the `IMAP` protocol.
+`wuchuheng_imap_cache` is a data-driven caching library based on the `IMAP` protocol.
 
 ## Features
 
@@ -14,19 +14,19 @@ Run this command:
 With Dart:
 
 ``` bash 
-$ dart pub add imap_cache
+$ dart pub add wuchuheng_imap_cache
 ```
 With Flutter:
 
 ``` bash 
-$ flutter pub add imap_cache
+$ flutter pub add wuchuheng_imap_cache
 ```
 
 This will add a line like this to your package's pubspec.yaml (and run an implicit dart pub get):
 
 ``` yaml 
 dependencies:
-  imap_cache: ^0.0.13
+  wuchuheng_imap_cache: ^0.0.13
 ```
 
 Alternatively, your editor might support dart pub get or flutter pub get. Check the docs for your editor to learn more.
@@ -34,12 +34,12 @@ Alternatively, your editor might support dart pub get or flutter pub get. Check 
 Import it
 Now in your Dart code, you can use:
 
-import ` 'package:imap_cache/imap_cache.dart'`;
+import ` 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart'`;
 
 ## Usage
 
 ```dart
-import 'package:imap_cache/index.dart';
+import 'package:wuchuheng_imap_cache/index.dart';
 
 void main() async {
   final ImapCache cacheServiceInstance = await ImapCache().connectToServer(
@@ -96,8 +96,8 @@ void main() async {
 
 You can contribute in one of three ways:
 
-1. File bug reports using the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
-2. Answer questions or fix bugs on the [issue tracker](https://github.com/wuchuheng/imap_cache_dart/issues).
+1. File bug reports using the [issue tracker](https://github.com/wuchuheng/wuchuheng_imap_cache_dart/issues).
+2. Answer questions or fix bugs on the [issue tracker](https://github.com/wuchuheng/wuchuheng_imap_cache_dart/issues).
 3. Contribute new features or update the wiki.
 
 ## License

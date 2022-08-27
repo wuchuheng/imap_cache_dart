@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:enough_mail/src/imap/imap_client.dart';
-import 'package:imap_cache/src/service/imap_client_service/imap_client_service_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/service/imap_client_service/imap_client_service_abstract.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 class ImapClientService implements ImapClientServiceAbstract {

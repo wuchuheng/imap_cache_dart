@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:imap_cache/imap_cache.dart';
-import 'package:imap_cache/src/dto/connect_config/index.dart';
-import 'package:imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:test/test.dart';
 import 'package:wuchuheng_env/wuchuheng_env.dart';
+import 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 void main() {

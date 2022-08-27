@@ -1,5 +1,5 @@
-import 'package:imap_cache/src/subscription/subscription_abstract.dart';
-import 'package:imap_cache/src/subscription/unsubscribe.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 
 import '../utils/hash.dart';
 import 'cache_subscribe_consumer_abstract.dart';
