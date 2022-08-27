@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
@@ -19,6 +20,7 @@ T enumFromString<T>(List<T> values, String value) {
 }
 
 List<int> beforeUnsetChannelId = [];
+List<int> afterUnsetChannelId = [];
 List<int> beforeSetChannelId = [];
 
 Future<Task> middleware() async {
@@ -53,8 +55,32 @@ Future<Task> middleware() async {
       case ChannelName.beforeSet:
         onBeforeSet(channel, imapCacheService, message);
         break;
+      case ChannelName.afterUnset:
+        onUnset(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+void onUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  if (!afterUnsetChannelId.contains(channel.channelId)) {
+    afterUnsetChannelId.add(channel.channelId);
+    final String? key = message.isEmpty ? null : message;
+    final subscribe = imapCacheService.afterUnset(
+        key: key,
+        callback: ({required key}) async {
+          Completer<void> completer = Completer();
+          channel.listen((message, channel) {
+            completer.complete(null);
+          });
+          channel.send(key);
+          completer.future;
+        });
+    channel.onClose((name) {
+      afterUnsetChannelId.remove(channel.channelId);
+      subscribe.unsubscribe();
+    });
+  }
 }
 
 void onBeforeSet(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {

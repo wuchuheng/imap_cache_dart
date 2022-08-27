@@ -39,8 +39,13 @@ class ImapCache implements ImapCacheServiceAbstract {
 
   @override
   UnsubscribeAbstract afterUnset({String? key, required AfterUnsetCallback callback}) {
-    // TODO: implement afterUnset
-    throw UnimplementedError();
+    final channel = task.createChannel(name: ChannelName.afterUnset.name);
+    channel.listen((message, channel) async {
+      await callback(key: message);
+      channel.send('');
+    });
+    channel.send(key ?? '');
+    return Unsubscribe(() => channel.close());
   }
 
   @override

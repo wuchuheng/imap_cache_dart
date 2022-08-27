@@ -6,4 +6,5 @@ enum ChannelName {
   get,
   beforeUnset,
   beforeSet,
+  afterUnset,
 }
