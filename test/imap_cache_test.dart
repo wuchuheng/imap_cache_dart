@@ -42,9 +42,14 @@ void main() {
         }
         return value;
       });
+      String expectAfterValue = '';
+      imapCache.afterSet(callback: ({required key, required value, required hash}) async {
+        expectAfterValue = value;
+      });
       await imapCache.set(key: key, value: value);
       await imapCache.set(key: setKey, value: 'tmp');
       expect(await imapCache.get(key: setKey), expectValue);
+      expect(expectAfterValue, expectValue);
     });
     test('GET Test', () async {
       final result = await imapCache.get(key: key);
