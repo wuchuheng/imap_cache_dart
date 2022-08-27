@@ -4,9 +4,9 @@ part 'index.g.dart';
 
 @JsonSerializable()
 class CallbackData {
-  final String key;
-  final String value;
-  final String hash;
+  String key;
+  String value;
+  String hash;
 
   CallbackData({required this.key, required this.value, required this.hash});
 

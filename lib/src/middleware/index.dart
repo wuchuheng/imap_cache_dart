@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:imap_cache/src/dto/before_unset/result_data/index.dart';
+import 'package:imap_cache/src/dto/callback_data/index.dart';
 import 'package:imap_cache/src/dto/channel_name.dart';
 import 'package:imap_cache/src/dto/set_data/index.dart';
 import 'package:imap_cache/src/service/imap_cache_service/index.dart';
@@ -18,6 +19,7 @@ T enumFromString<T>(List<T> values, String value) {
 }
 
 List<int> beforeUnsetChannelId = [];
+List<int> beforeSetChannelId = [];
 
 Future<Task> middleware() async {
   ImapCacheService imapCacheService = ImapCacheService();
@@ -48,8 +50,34 @@ Future<Task> middleware() async {
       case ChannelName.beforeUnset:
         onBeforeUnset(channel, imapCacheService, message);
         break;
+      case ChannelName.beforeSet:
+        onBeforeSet(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+void onBeforeSet(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  if (!beforeSetChannelId.contains(channel.channelId)) {
+    beforeSetChannelId.add(channel.channelId);
+    final subscribe = imapCacheService.beforeSet(
+      key: message.isEmpty ? null : message,
+      callback: ({required String key, required String value, required String hash}) async {
+        final subject = SubjectHook<CallbackData>();
+        channel.listen((message, channel) {
+          final callbackData = CallbackData.fromJson(jsonDecode(message));
+          subject.next(callbackData);
+        });
+        channel.send(jsonEncode(CallbackData(key: key, value: value, hash: hash)));
+        final callData = await subject.toFuture();
+        return callData.value;
+      },
+    );
+    channel.onClose((name) {
+      beforeSetChannelId.remove(channel.channelId);
+      subscribe.unsubscribe();
+    });
+  }
 }
 
 void onBeforeUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {

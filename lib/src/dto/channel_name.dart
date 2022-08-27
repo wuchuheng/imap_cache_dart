@@ -5,4 +5,5 @@ enum ChannelName {
   has,
   get,
   beforeUnset,
+  beforeSet,
 }

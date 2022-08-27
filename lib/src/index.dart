@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:imap_cache/src/dto/before_unset/result_data/index.dart';
+import 'package:imap_cache/src/dto/callback_data/index.dart';
 import 'package:imap_cache/src/dto/channel_name.dart';
 import 'package:imap_cache/src/dto/set_data/index.dart';
 import 'package:imap_cache/src/middleware/index.dart';
@@ -44,7 +45,15 @@ class ImapCache implements ImapCacheServiceAbstract {
 
   @override
   UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback}) {
-    return _subscriptionImp.beforeSet(key: key, callback: callback);
+    final channel = task.createChannel(name: ChannelName.beforeSet.name);
+    channel.listen((message, channel) async {
+      final callbackData = CallbackData.fromJson(jsonDecode(message));
+      final newResult = await callback(key: callbackData.key, value: callbackData.value, hash: callbackData.hash);
+      callbackData.value = newResult;
+      channel.send(jsonEncode(callbackData));
+    });
+    channel.send(key ?? '');
+    return Unsubscribe(() => channel.close());
   }
 
   @override
