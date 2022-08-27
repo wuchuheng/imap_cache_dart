@@ -34,7 +34,17 @@ void main() {
       imapCache = await ImapCache().connectToServer(config);
     });
     test('SET Test', () async {
+      final String setKey = 'setKey';
+      final expectValue = 'hello';
+      imapCache.beforeSet(callback: ({required key, required value, required hash}) async {
+        if (key == setKey) {
+          return expectValue;
+        }
+        return value;
+      });
       await imapCache.set(key: key, value: value);
+      await imapCache.set(key: setKey, value: 'tmp');
+      expect(await imapCache.get(key: setKey), expectValue);
     });
     test('GET Test', () async {
       final result = await imapCache.get(key: key);
