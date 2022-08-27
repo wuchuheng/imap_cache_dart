@@ -12,7 +12,7 @@ class ConnectConfig {
   final String boxName;
   final int syncIntervalSeconds;
   final bool isDebug;
-  String? localCacheDirectory;
+  String localCacheDirectory;
 
   ConnectConfig({
     required this.userName,
@@ -23,7 +23,7 @@ class ConnectConfig {
     required this.boxName,
     this.syncIntervalSeconds = 5,
     this.isDebug = false,
-    this.localCacheDirectory,
+    required this.localCacheDirectory,
   });
 
   factory ConnectConfig.fromJson(Map<String, dynamic> json) {

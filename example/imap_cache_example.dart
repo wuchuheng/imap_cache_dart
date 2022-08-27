@@ -10,6 +10,7 @@ void main() async {
     imapServerPort: 993,
     isImapServerSecure: true,
     boxName: 'snotes',
+    localCacheDirectory: '<Cache save directory>',
   );
   final ImapCacheServiceAbstract cacheServiceInstance = await ImapCache().connectToServer(config);
 

@@ -34,8 +34,12 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.12
 - fix: fix the issue that synchronization event caused by time resolution error.
+
 ## 0.0.13
 - refactor: Refactoring the entire project to optimize performance.
+
 ## 0.0.14
 - refactor: refactoring codee with isolate.
 
+## 0.0.14
+- fix: fix the issue of local cache directory.

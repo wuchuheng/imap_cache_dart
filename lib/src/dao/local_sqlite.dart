@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:imap_cache/src/dao/cache_info_dao/index.dart';
 import 'package:imap_cache/src/dao/online_cache_info_dao/index.dart';
 import 'package:imap_cache/src/model/online_cache_info_model/index.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../model/cache_info_model/index.dart';
@@ -16,13 +15,7 @@ class LocalSQLite {
   }
 
   init({required String userName, String? localCacheDirectory}) async {
-    String directory;
-    if (localCacheDirectory != null) {
-      directory = localCacheDirectory;
-    } else {
-      directory = (await getApplicationDocumentsDirectory()).path;
-    }
-    String path = '$directory/localCache/$userName';
+    String path = '$localCacheDirectory/localCache/$userName';
     final file = '$path/sqlite3.so';
     if (!await Directory(path).exists()) await Directory(path).create(recursive: true);
     _db = sqlite3.open(file);

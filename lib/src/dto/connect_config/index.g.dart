@@ -16,7 +16,7 @@ ConnectConfig _$ConnectConfigFromJson(Map<String, dynamic> json) =>
       boxName: json['boxName'] as String,
       syncIntervalSeconds: json['syncIntervalSeconds'] as int? ?? 5,
       isDebug: json['isDebug'] as bool? ?? false,
-      localCacheDirectory: json['localCacheDirectory'] as String?,
+      localCacheDirectory: json['localCacheDirectory'] as String,
     );
 
 Map<String, dynamic> _$ConnectConfigToJson(ConnectConfig instance) =>
