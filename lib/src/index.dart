@@ -38,6 +38,7 @@ class ImapCache implements ImapCacheServiceAbstract {
       channel.send('');
     });
     channel.send(key ?? '');
+    channel.onError((e) => throw e);
     return Unsubscribe(() {
       channel.close();
     });
@@ -51,6 +52,7 @@ class ImapCache implements ImapCacheServiceAbstract {
       channel.send('');
     });
     channel.send(key ?? '');
+    channel.onError((e) => throw e);
     return Unsubscribe(() => channel.close());
   }
 
@@ -64,6 +66,7 @@ class ImapCache implements ImapCacheServiceAbstract {
       channel.send(jsonEncode(callbackData));
     });
     channel.send(key ?? '');
+    channel.onError((e) => throw e);
     return Unsubscribe(() => channel.close());
   }
 
@@ -85,6 +88,7 @@ class ImapCache implements ImapCacheServiceAbstract {
     final channel = task.createChannel(name: ChannelName.get.name);
     final result$ = channel.listenToFuture();
     channel.send(key);
+    channel.onError((e) => throw e);
     final result = await result$;
     channel.close();
     return result;
@@ -95,6 +99,7 @@ class ImapCache implements ImapCacheServiceAbstract {
     final channel = task.createChannel(name: ChannelName.has.name);
     final $result = channel.listenToFuture();
     channel.send(key);
+    channel.onError((e) => throw e);
     final result = await $result;
     channel.close();
     return result.isEmpty ? null : result;
@@ -106,6 +111,7 @@ class ImapCache implements ImapCacheServiceAbstract {
     final channel = task.createChannel(name: ChannelName.set.name);
     final result$ = channel.listenToFuture();
     channel.send(payload);
+    channel.onError((e) => throw e);
     await result$;
     channel.close();
   }
@@ -115,6 +121,7 @@ class ImapCache implements ImapCacheServiceAbstract {
     final channel = task.createChannel(name: ChannelName.unset.name);
     final result$ = channel.listenToFuture();
     channel.send(key);
+    channel.onError((e) => throw e);
     await result$;
     channel.close();
   }
