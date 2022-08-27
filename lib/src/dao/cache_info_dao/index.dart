@@ -1,8 +1,7 @@
+import 'package:sqlite3/sqlite3.dart';
 import 'package:wuchuheng_imap_cache/src/dao/cache_info_dao/cache_info_dao_util.dart';
 import 'package:wuchuheng_imap_cache/src/dao/cache_info_dao/index_abstract.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
-import 'package:sqlite3/sqlite3.dart';
-import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 class CacheInfoDao implements CacheInfoDaoAbstract {
   final Database _db;
@@ -27,19 +26,17 @@ class CacheInfoDao implements CacheInfoDaoAbstract {
     final hasCacheInfo = findByKey(key: cacheInfo.key);
     final tableName = CacheInfoModel.tableName;
     if (hasCacheInfo != null) {
-      String deletedAt = cacheInfo.deletedAt != null ? "'${cacheInfo.deletedAt!.toString()}'" : 'null';
-      final sql = '''
+      String? deletedAt = cacheInfo.deletedAt != null ? cacheInfo.deletedAt!.toString() : null;
+      _db.execute('''
       UPDATE $tableName SET 
-        `value` = '${cacheInfo.value}',
-        `hash` = '${cacheInfo.hash}',
-        `symbol` = '${cacheInfo.symbol}',
-        `updated_at` = '${cacheInfo.updatedAt}',
-        `deleted_at` = $deletedAt,
-        `uid` = ${cacheInfo.uid}
-        WHERE `key` = '${cacheInfo.key}'
-      ''';
-      _db.execute(sql);
-      Logger.info('SQL: $sql');
+        value = ?,
+        hash = '${cacheInfo.hash}',
+        symbol = '${cacheInfo.symbol}',
+        updated_at = '${cacheInfo.updatedAt.toString()}',
+        deleted_at = ?,
+        uid = ${cacheInfo.uid}
+        WHERE key = '${cacheInfo.key}'
+      ''', [cacheInfo.value, deletedAt]);
     } else {
       _db.execute('''
       INSERT INTO $tableName (
