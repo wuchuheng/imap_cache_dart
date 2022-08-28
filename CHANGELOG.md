@@ -58,3 +58,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.20
 - fix: fix the issue of sqlite.
+
+## 0.0.21
+- chore: Delete useless libraries
