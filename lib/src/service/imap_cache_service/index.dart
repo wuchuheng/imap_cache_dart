@@ -5,6 +5,7 @@ import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstar
 import 'package:wuchuheng_imap_cache/src/service/local_cache_service/local_cache_service.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
+import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';
@@ -69,4 +70,15 @@ class ImapCacheService implements ImapCacheServiceAbstract {
   @override
   UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback}) =>
       _subscriptionImp.beforeSet(key: key, callback: callback);
+
+  @override
+  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback) {
+    final subscribe = Logger.subscribe((value) {
+      callback(value);
+    });
+
+    return Unsubscribe(() {
+      subscribe.unsubscribe();
+    });
+  }
 }

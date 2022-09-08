@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:wuchuheng_hooks/wuchuheng_hooks.dart' as hook;
 import 'package:wuchuheng_imap_cache/src/dto/before_unset/result_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/dto/callback_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
@@ -10,11 +11,11 @@ import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstar
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
+import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import 'dto/connect_config/index.dart';
 
 class ImapCache implements ImapCacheServiceAbstract {
-  late IsolateCallback isolateMiddleware;
   late Task task;
 
   @override
@@ -124,5 +125,24 @@ class ImapCache implements ImapCacheServiceAbstract {
     channel.onError((e) => throw e);
     await result$;
     channel.close();
+  }
+
+  final hook.SubjectHook<LoggerItem> _subjectHook = hook.SubjectHook();
+
+  @override
+  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback) {
+    final result = _subjectHook.subscribe((value) => callback(value));
+    final channel = task.createChannel(name: ChannelName.subjectLog.name);
+    channel.listen((message, channel) {
+      Map<String, dynamic> mapData = jsonDecode(message);
+      final loggerItem = LoggerItem.fromJson(mapData);
+      _subjectHook.next(loggerItem);
+    });
+    channel.send('');
+
+    return Unsubscribe(() {
+      result.unsubscribe();
+      channel.close();
+    });
   }
 }

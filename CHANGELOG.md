@@ -61,3 +61,8 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 0.0.21
 - chore: Delete useless libraries
+
+## 1.0.0
+- fix: Fix the exception generated when saving data.
+- feat: Subscribe to the log.
+

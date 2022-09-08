@@ -39,4 +39,9 @@ void main() async {
   /// Unsubscribe from events for foo key
   unsetSubscribeHandle.unsubscribe();
   unsetSubscribeHandle.unsubscribe();
+
+  /// Subscribe to the log
+  cacheServiceInstance.subscribeLog((loggerItem) {
+    print(loggerItem.message);
+  });
 }

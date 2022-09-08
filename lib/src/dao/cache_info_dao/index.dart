@@ -23,7 +23,7 @@ class CacheInfoDao implements CacheInfoDaoAbstract {
 
   @override
   void save(CacheInfoModel cacheInfo) {
-    final hasCacheInfo = findByKey(key: cacheInfo.key);
+    final hasCacheInfo = findByKeyWithoutSoftDelete(key: cacheInfo.key);
     final tableName = CacheInfoModel.tableName;
     if (hasCacheInfo != null) {
       String? deletedAt = cacheInfo.deletedAt != null ? cacheInfo.deletedAt!.toString() : null;
@@ -98,5 +98,18 @@ class CacheInfoDao implements CacheInfoDaoAbstract {
     }
 
     return result;
+  }
+
+  @override
+  CacheInfoModel? findByKeyWithoutSoftDelete({required String key}) {
+    String tableName = CacheInfoModel.tableName;
+    final sql = "select * from `$tableName` where `key` = '$key'";
+    final ResultSet result = _db.select(sql);
+    if (result.isNotEmpty) {
+      final Row row = result[0];
+      return CacheInfoDaoUtil.rowConvertCacheInfoModel(row);
+    }
+
+    return null;
   }
 }

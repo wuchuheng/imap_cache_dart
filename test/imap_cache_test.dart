@@ -31,6 +31,12 @@ void main() {
       );
       imapCache = await ImapCache().connectToServer(config);
     });
+    test('SubjectLog test', () async {
+      late LoggerItem loggerItem;
+      imapCache.subscribeLog((value) => loggerItem = value);
+      await imapCache.set(key: 'hello', value: 'hello');
+      expect(loggerItem != null, isTrue);
+    });
     test('SET afterSet beforeSet Test', () async {
       final String setKey = 'setKey';
       final expectValue = 'hello';

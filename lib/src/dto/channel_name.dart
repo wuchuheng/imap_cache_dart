@@ -8,4 +8,5 @@ enum ChannelName {
   beforeSet,
   afterUnset,
   afterSet,
+  subjectLog,
 }

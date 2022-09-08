@@ -62,8 +62,18 @@ Future<Task> middleware() async {
       case ChannelName.afterSet:
         onAfterSet(channel, imapCacheService, message);
         break;
+      case ChannelName.subjectLog:
+        onSubjectLog(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+void onSubjectLog(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  final unsubscribe = imapCacheService.subscribeLog((loggerItem) {
+    channel.send(jsonEncode(loggerItem));
+  });
+  channel.onClose((name) => unsubscribe.unsubscribe());
 }
 
 void onAfterSet(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
