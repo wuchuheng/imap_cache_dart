@@ -66,3 +66,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 - fix: Fix the exception generated when saving data.
 - feat: Subscribe to the log.
 
+## 1.0.1
+- chore: updated dependence.
+
