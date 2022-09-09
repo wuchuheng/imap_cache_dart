@@ -10,4 +10,6 @@ enum ChannelName {
   afterSet,
   subjectLog,
   disconnect,
+  afterSync,
+  beforeSync,
 }

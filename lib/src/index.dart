@@ -8,6 +8,7 @@ import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
 import 'package:wuchuheng_imap_cache/src/dto/set_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/middleware/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
+import 'package:wuchuheng_imap_cache/src/service/sync_service/sync_event.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
@@ -15,11 +16,11 @@ import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import 'dto/connect_config/index.dart';
 
-class ImapCache implements ImapCacheServiceAbstract {
+class ImapCache implements ImapCacheService {
   late Task task;
 
   @override
-  Future<ImapCacheServiceAbstract> connectToServer(ConnectConfig config) async {
+  Future<ImapCacheService> connectToServer(ConnectConfig config) async {
     task = await middleware();
     final connectChannel = task.createChannel(name: ChannelName.connect.name);
     final result$ = connectChannel.listenToFuture();
@@ -161,5 +162,29 @@ class ImapCache implements ImapCacheServiceAbstract {
     });
 
     return result.future;
+  }
+
+  @override
+  hook.Unsubscribe afterSync(AfterSyncCallback callback) {
+    final channel = task.createChannel(name: ChannelName.afterSync.name);
+    channel.listen((message, channel) => callback(Duration(seconds: int.parse(message))));
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
+  }
+
+  @override
+  hook.Unsubscribe beforeSync(BeforeSyncCallback callback) {
+    final channel = task.createChannel(name: ChannelName.beforeSync.name);
+    channel.listen((message, channel) => callback(Duration(seconds: int.parse(message))));
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
   }
 }

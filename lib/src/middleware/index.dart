@@ -10,6 +10,7 @@ import 'package:wuchuheng_imap_cache/src/dto/set_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 
+import '../../wuchuheng_imap_cache.dart';
 import '../dto/connect_config/index.dart';
 import '../dto/isolate_request/index.dart';
 
@@ -25,7 +26,7 @@ List<int> afterUnsetChannelId = [];
 List<int> afterSetChannelId = [];
 
 Future<Task> middleware() async {
-  ImapCacheService imapCacheService = ImapCacheService();
+  ImapCacheServiceI imapCacheService = ImapCacheServiceI();
   return await IsolateTask((message, channel) async {
     final ChannelName channelName = enumFromString<ChannelName>(ChannelName.values, channel.name);
     switch (channelName) {
@@ -68,23 +69,41 @@ Future<Task> middleware() async {
       case ChannelName.disconnect:
         onDisconnect(channel, imapCacheService, message);
         break;
+      case ChannelName.afterSync:
+        onAfterSync(channel, imapCacheService, message);
+        break;
+      case ChannelName.beforeSync:
+        onBeforeSync(channel, imapCacheService, message);
+        break;
     }
   });
 }
 
-void onDisconnect(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onBeforeSync(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  final unsubscribe = imapCacheService.beforeSync((duration) {
+    channel.send(duration.inSeconds.toString());
+  });
+  channel.onClose((name) => unsubscribe.unsubscribe());
+}
+
+void onAfterSync(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  final unsubscribe = imapCacheService.afterSync((duration) => channel.send(duration.inSeconds.toString()));
+  channel.onClose((name) => unsubscribe.unsubscribe());
+}
+
+void onDisconnect(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   imapCacheService.disconnect();
   channel.send('');
 }
 
-void onSubjectLog(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onSubjectLog(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   final unsubscribe = imapCacheService.subscribeLog((loggerItem) {
     channel.send(jsonEncode(loggerItem));
   });
   channel.onClose((name) => unsubscribe.unsubscribe());
 }
 
-void onAfterSet(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterSetChannelId.contains(channel.channelId)) {
     final String? key = message.isEmpty ? null : message;
     afterSetChannelId.add(channel.channelId);
@@ -106,7 +125,7 @@ void onAfterSet(ChannelAbstract channel, ImapCacheService imapCacheService, Stri
   }
 }
 
-void onUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterUnsetChannelId.contains(channel.channelId)) {
     afterUnsetChannelId.add(channel.channelId);
     final String? key = message.isEmpty ? null : message;
@@ -128,7 +147,7 @@ void onUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String 
   }
 }
 
-void onBeforeSet(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onBeforeSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeSetChannelId.contains(channel.channelId)) {
     beforeSetChannelId.add(channel.channelId);
     final subscribe = imapCacheService.beforeSet(
@@ -152,7 +171,7 @@ void onBeforeSet(ChannelAbstract channel, ImapCacheService imapCacheService, Str
   }
 }
 
-void onBeforeUnset(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+void onBeforeUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeUnsetChannelId.contains(channel.channelId)) {
     beforeUnsetChannelId.add(channel.channelId);
     final subscribe = imapCacheService.beforeUnset(

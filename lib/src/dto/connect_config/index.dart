@@ -12,9 +12,11 @@ class ConnectConfig {
   final String boxName;
   final int syncIntervalSeconds;
   final bool isDebug;
+  final int syncDurationSeconds;
   String localCacheDirectory;
 
   ConnectConfig({
+    this.syncDurationSeconds = 5,
     required this.userName,
     required this.password,
     required this.imapServerHost,

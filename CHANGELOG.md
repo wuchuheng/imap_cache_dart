@@ -69,5 +69,8 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.1
 - chore: updated dependence.
 
-## 1.0.1
+## 1.0.2
 - feat: add the disconnect method to API.
+
+## 1.0.3
+- feat: add the sync subscribe method.

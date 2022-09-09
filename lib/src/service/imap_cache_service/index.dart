@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:wuchuheng_hooks/wuchuheng_hooks.dart' as hook;
 import 'package:wuchuheng_imap_cache/src/dto/connect_config/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:wuchuheng_imap_cache/src/service/local_cache_service/local_cache_service.dart';
@@ -10,22 +11,28 @@ import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';
 import '../sync_service/index.dart';
+import '../sync_service/sync_service.dart';
 
-class ImapCacheService implements ImapCacheServiceAbstract {
+class ImapCacheServiceI implements ImapCacheService {
   late LocalCacheService _localCacheService;
   late SubscriptionImp _subscriptionImp;
   late LocalSQLite _localSQLite;
   late SyncService _syncService;
+  hook.UnsubscribeCollect unsubscribeCollect = hook.UnsubscribeCollect([]);
 
   /// connect to the IMAP server with user's account
   @override
-  Future<ImapCacheServiceAbstract> connectToServer(ConnectConfig config) async {
+  Future<ImapCacheService> connectToServer(ConnectConfig config) async {
     Logger.debugger = config.isDebug;
     _localSQLite = await LocalSQLite().init(userName: config.userName, localCacheDirectory: config.localCacheDirectory);
     _localCacheService = LocalCacheService(_localSQLite);
     _subscriptionImp = SubscriptionImp();
-    _syncService = SyncService(config, _localSQLite, this);
+    _syncService = SyncServiceI(config, _localSQLite, this);
     await _syncService.start();
+    unsubscribeCollect = hook.UnsubscribeCollect([
+      _syncService.afterSync(afterSyncSubject.next),
+      _syncService.beforeSync(beforeSyncSubject.next),
+    ]);
     return this;
   }
 
@@ -85,5 +92,17 @@ class ImapCacheService implements ImapCacheServiceAbstract {
   }
 
   @override
-  Future<void> disconnect() async => await _syncService.stop();
+  Future<void> disconnect() async {
+    await _syncService.stop();
+    unsubscribeCollect.unsubscribe();
+  }
+
+  hook.SubjectHook<Duration> afterSyncSubject = hook.SubjectHook();
+  hook.SubjectHook<Duration> beforeSyncSubject = hook.SubjectHook();
+
+  @override
+  hook.Unsubscribe afterSync(void Function(Duration duration) callback) => afterSyncSubject.subscribe(callback);
+
+  @override
+  hook.Unsubscribe beforeSync(void Function(Duration duration) callback) => beforeSyncSubject.subscribe(callback);
 }

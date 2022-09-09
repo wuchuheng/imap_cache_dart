@@ -10,7 +10,8 @@ void main() async {
     boxName: 'snotes',
     localCacheDirectory: '<Cache save directory>',
   );
-  final ImapCacheServiceAbstract cacheServiceInstance = await ImapCache().connectToServer(config);
+  final ImapCacheService cacheServiceInstance =
+      await ImapCache().connectToServer(config);
 
   /// set Data
   await cacheServiceInstance.set(key: 'foo', value: 'hello');
@@ -29,7 +30,10 @@ void main() async {
   await cacheServiceInstance.set(key: 'foo', value: 'hello');
   final unsetSubscribeHandle = cacheServiceInstance.beforeSet(
       key: 'foo',
-      callback: ({required String key, required String value, required String hash}) async {
+      callback: (
+          {required String key,
+          required String value,
+          required String hash}) async {
         return 'new value';
       });
 

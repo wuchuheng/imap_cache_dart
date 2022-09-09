@@ -1,27 +1,29 @@
 import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
+import 'package:wuchuheng_imap_cache/src/service/sync_service/online_sync_to_local_service/online_sync_to_local_service.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
-import '../../dao/local_sqlite.dart';
-import '../imap_cache_service/index.dart';
-import '../imap_directory_service/index.dart';
+import '../../../dao/local_sqlite.dart';
+import '../../imap_cache_service/index.dart';
+import '../../imap_directory_service/index.dart';
 
-class OnlineSyncToLocalService {
+class OnlineSyncToLocalServiceI implements OnlineSyncToLocalService {
   late ImapDirectoryService _imapDirectoryService;
   late LocalSQLite _localSQLite;
-  late ImapCacheService _imapCache;
+  late ImapCacheServiceI _imapCache;
 
-  OnlineSyncToLocalService({
+  OnlineSyncToLocalServiceI({
     required ImapDirectoryService imapDirectoryService,
     required LocalSQLite localSQLite,
-    required ImapCacheService imapCache,
+    required ImapCacheServiceI imapCache,
   }) {
     _imapCache = imapCache;
     _imapDirectoryService = imapDirectoryService;
     _localSQLite = localSQLite;
   }
 
+  @override
   Future<void> start() async {
     Logger.info('Start sync data.');
     await fetchOnlineDataToLocalDB();
@@ -30,6 +32,7 @@ class OnlineSyncToLocalService {
     Logger.info('Completed data sync');
   }
 
+  @override
   Future<void> localSyncToOnline() async {
     final localData = _localSQLite.cacheInfoDao().fetchLocal();
     for (final item in localData) {
@@ -47,6 +50,7 @@ class OnlineSyncToLocalService {
     }
   }
 
+  @override
   Future<void> onlineSyncToLocal() async {
     final List<OnlineCacheInfoModel> onlineCacheInfoList = _localSQLite.onlineCacheInfoDao().fetch();
     for (final onlineItem in onlineCacheInfoList) {
@@ -105,6 +109,7 @@ class OnlineSyncToLocalService {
   }
 
   /// Pull down the offline data
+  @override
   Future<void> fetchOnlineDataToLocalDB() async {
     List<SubjectInfo> subjects = await _imapDirectoryService.getFiles();
     for (final subject in subjects) {

@@ -5,7 +5,7 @@ import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 import 'index_abstarct.dart';
 
 abstract class ConnectAbstract {
-  Future<ImapCacheServiceAbstract> connectToServer(ConnectConfig config);
-  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) calbblback);
+  Future<ImapCacheService> connectToServer(ConnectConfig config);
+  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback);
   Future<void> disconnect();
 }

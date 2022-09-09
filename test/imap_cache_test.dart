@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -7,7 +8,7 @@ import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 void main() {
   group('A group of tests', () {
-    late ImapCacheServiceAbstract imapCache;
+    late ImapCacheService imapCache;
     final key = 'hello';
     final value = 'hello';
     test('Init', () async {
@@ -30,6 +31,16 @@ void main() {
         localCacheDirectory: DotEnv.get('LOCAL_CACHE_DIRECTORY', ''),
       );
       imapCache = await ImapCache().connectToServer(config);
+    });
+    test('Sync subject test', () {
+      late Duration beforeDuration;
+      late Duration afterDuration;
+      imapCache.beforeSync((value) => beforeDuration = value);
+      imapCache.afterSync((value) => afterDuration = value);
+      Timer(Duration(seconds: 50), () {
+        expect(beforeDuration != null, isTrue);
+        expect(afterDuration != null, isTrue);
+      });
     });
     test('SubjectLog test', () async {
       late LoggerItem loggerItem;
@@ -87,7 +98,7 @@ void main() {
     }, timeout: Timeout(Duration(seconds: 60)));
 
     test('Duration', () async {
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 60));
     });
   });
 }
