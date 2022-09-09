@@ -15,6 +15,7 @@ class ImapCacheService implements ImapCacheServiceAbstract {
   late LocalCacheService _localCacheService;
   late SubscriptionImp _subscriptionImp;
   late LocalSQLite _localSQLite;
+  late SyncService _syncService;
 
   /// connect to the IMAP server with user's account
   @override
@@ -23,7 +24,8 @@ class ImapCacheService implements ImapCacheServiceAbstract {
     _localSQLite = await LocalSQLite().init(userName: config.userName, localCacheDirectory: config.localCacheDirectory);
     _localCacheService = LocalCacheService(_localSQLite);
     _subscriptionImp = SubscriptionImp();
-    await SyncService(config, _localSQLite, this).start();
+    _syncService = SyncService(config, _localSQLite, this);
+    await _syncService.start();
     return this;
   }
 
@@ -81,4 +83,7 @@ class ImapCacheService implements ImapCacheServiceAbstract {
       subscribe.unsubscribe();
     });
   }
+
+  @override
+  Future<void> disconnect() async => await _syncService.stop();
 }

@@ -15,11 +15,12 @@ class SyncService {
   final LocalSQLite _localSQLite;
   final ImapCacheService _imapCache;
   bool _isInit = false;
-
+  bool _isRunning = false;
+  late ImapClientService _imapClientService;
   SyncService(this._config, this._localSQLite, this._imapCache);
 
   Future<void> _init(ConnectConfig config) async {
-    final imapClientService = ImapClientService(
+    _imapClientService = ImapClientService(
       userName: config.userName,
       password: config.password,
       imapServerHost: config.imapServerHost,
@@ -28,7 +29,7 @@ class SyncService {
     );
     final imapDirectoryService = ImapDirectoryService(
       path: config.boxName,
-      imapClientService: imapClientService,
+      imapClientService: _imapClientService,
       localSQLite: _localSQLite,
     );
     _imapDirectoryService = imapDirectoryService;
@@ -40,6 +41,7 @@ class SyncService {
 
   /// Start synchronizing data
   Future<void> start() async {
+    _isRunning = true;
     Completer<void> completer = Completer();
     if (!_isInit) {
       await _init(_config);
@@ -47,21 +49,32 @@ class SyncService {
       completer.complete();
       await _imapDirectoryService.selectPath();
     }
-    (() async {
-      while (true) {
-        try {
-          await OnlineSyncToLocalService(
-            imapDirectoryService: _imapDirectoryService,
-            localSQLite: _localSQLite,
-            imapCache: _imapCache,
-          ).start();
-        } catch (e) {
-          Logger.error(e.toString());
-        }
-        await Future.delayed(Duration(seconds: 5));
+    syncData() async {
+      if (!_isRunning) return;
+      try {
+        await OnlineSyncToLocalService(
+          imapDirectoryService: _imapDirectoryService,
+          localSQLite: _localSQLite,
+          imapCache: _imapCache,
+        ).start();
+      } catch (e) {
+        Logger.error(e.toString());
       }
-    })();
+      Timer(Duration(seconds: 5), () async {
+        await syncData();
+      });
+    }
+
+    syncData();
 
     return completer.future;
+  }
+
+  Future<void> stop() async {
+    _isRunning = false;
+    _isInit = false;
+    final client = await _imapClientService.getClient();
+    client.disconnect();
+    Logger.info('Stop data synchronization');
   }
 }

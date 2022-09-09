@@ -65,8 +65,16 @@ Future<Task> middleware() async {
       case ChannelName.subjectLog:
         onSubjectLog(channel, imapCacheService, message);
         break;
+      case ChannelName.disconnect:
+        onDisconnect(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+void onDisconnect(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  imapCacheService.disconnect();
+  channel.send('');
 }
 
 void onSubjectLog(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {

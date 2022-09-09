@@ -9,4 +9,5 @@ enum ChannelName {
   afterUnset,
   afterSet,
   subjectLog,
+  disconnect,
 }

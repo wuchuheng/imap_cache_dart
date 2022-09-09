@@ -7,4 +7,5 @@ import 'index_abstarct.dart';
 abstract class ConnectAbstract {
   Future<ImapCacheServiceAbstract> connectToServer(ConnectConfig config);
   UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) calbblback);
+  Future<void> disconnect();
 }

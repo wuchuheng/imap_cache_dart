@@ -85,6 +85,7 @@ void main() {
       expect(callback2, isTrue);
       expect(afterUnsetKey, key);
     }, timeout: Timeout(Duration(seconds: 60)));
+
     test('Duration', () async {
       await Future.delayed(Duration(seconds: 5));
     });

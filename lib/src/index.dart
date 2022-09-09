@@ -145,4 +145,21 @@ class ImapCache implements ImapCacheServiceAbstract {
       channel.close();
     });
   }
+
+  @override
+  Future<void> disconnect() {
+    Completer<void> result = Completer();
+    final channel = task.createChannel(name: ChannelName.disconnect.name);
+    channel.listen((message, _) {
+      result.complete();
+      channel.close();
+    });
+    channel.send('');
+    channel.onError((e) {
+      result.completeError(Exception());
+      channel.close();
+    });
+
+    return result.future;
+  }
 }
