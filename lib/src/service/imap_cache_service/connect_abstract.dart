@@ -8,4 +8,5 @@ abstract class ConnectAbstract {
   Future<ImapCacheService> connectToServer(ConnectConfig config);
   UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback);
   Future<void> disconnect();
+  Future<void> setSyncInterval(int second);
 }

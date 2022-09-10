@@ -31,7 +31,11 @@ Future<Task> middleware() async {
     final ChannelName channelName = enumFromString<ChannelName>(ChannelName.values, channel.name);
     switch (channelName) {
       case ChannelName.connect:
-        await imapCacheService.connectToServer(ConnectConfig.fromJson(jsonDecode(message)));
+        try {
+          await imapCacheService.connectToServer(ConnectConfig.fromJson(jsonDecode(message)));
+        } catch (error) {
+          throw error;
+        }
         channel.send('');
         break;
       case ChannelName.set:
@@ -111,7 +115,7 @@ void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, Str
         key: key,
         callback: ({required key, required value, required hash}) async {
           final subject = SubjectHook<void>();
-          final listen = channel.listen((message, channel) {
+          final listen = channel.listen((message, channel) async {
             subject.next(null);
           });
           channel.send(jsonEncode(CallbackData(key: key, value: value, hash: hash)));
@@ -133,7 +137,7 @@ void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String
         key: key,
         callback: ({required key}) async {
           Completer<void> completer = Completer();
-          final listen = channel.listen((message, channel) {
+          final listen = channel.listen((message, channel) async {
             completer.complete(null);
           });
           channel.send(key);
@@ -154,7 +158,7 @@ void onBeforeSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, St
       key: message.isEmpty ? null : message,
       callback: ({required String key, required String value, required String hash}) async {
         final subject = SubjectHook<CallbackData>();
-        final listen = channel.listen((message, channel) {
+        final listen = channel.listen((message, channel) async {
           final callbackData = CallbackData.fromJson(jsonDecode(message));
           subject.next(callbackData);
         });
@@ -178,7 +182,7 @@ void onBeforeUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, 
       key: message.isEmpty ? null : message,
       callback: ({required String key}) async {
         final boolSubject = SubjectHook<bool>();
-        final listen = channel.listen((message, channel) {
+        final listen = channel.listen((message, channel) async {
           final result = ResultData.fromJson(jsonDecode(message));
           boolSubject.next(result.result);
         });

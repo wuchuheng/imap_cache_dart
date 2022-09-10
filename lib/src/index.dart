@@ -24,11 +24,17 @@ class ImapCache implements ImapCacheService {
     task = await middleware();
     final connectChannel = task.createChannel(name: ChannelName.connect.name);
     final result$ = connectChannel.listenToFuture();
-    connectChannel.onError((e) => throw e);
+    Completer<ImapCacheService> completer = Completer();
+    connectChannel.onError((e) {
+      completer.completeError(e);
+      connectChannel.close();
+    });
     connectChannel.send(jsonEncode(config));
-    await result$;
-    connectChannel.close();
-    return this;
+    result$.then((value) {
+      completer.complete(this);
+      connectChannel.close();
+    });
+    return completer.future;
   }
 
   @override
@@ -134,7 +140,7 @@ class ImapCache implements ImapCacheService {
   UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback) {
     final result = _subjectHook.subscribe((value) => callback(value));
     final channel = task.createChannel(name: ChannelName.subjectLog.name);
-    channel.listen((message, channel) {
+    channel.listen((message, channel) async {
       Map<String, dynamic> mapData = jsonDecode(message);
       final loggerItem = LoggerItem.fromJson(mapData);
       _subjectHook.next(loggerItem);
@@ -151,7 +157,7 @@ class ImapCache implements ImapCacheService {
   Future<void> disconnect() {
     Completer<void> result = Completer();
     final channel = task.createChannel(name: ChannelName.disconnect.name);
-    channel.listen((message, _) {
+    channel.listen((message, _) async {
       result.complete();
       channel.close();
     });
@@ -167,7 +173,7 @@ class ImapCache implements ImapCacheService {
   @override
   hook.Unsubscribe afterSync(AfterSyncCallback callback) {
     final channel = task.createChannel(name: ChannelName.afterSync.name);
-    channel.listen((message, channel) => callback(Duration(seconds: int.parse(message))));
+    channel.listen((message, channel) async => callback(Duration(seconds: int.parse(message))));
     channel.send('');
 
     return hook.Unsubscribe(() {
@@ -179,12 +185,24 @@ class ImapCache implements ImapCacheService {
   @override
   hook.Unsubscribe beforeSync(BeforeSyncCallback callback) {
     final channel = task.createChannel(name: ChannelName.beforeSync.name);
-    channel.listen((message, channel) => callback(Duration(seconds: int.parse(message))));
+    channel.listen((message, channel) async => callback(Duration(seconds: int.parse(message))));
     channel.send('');
 
     return hook.Unsubscribe(() {
       channel.close();
       return true;
     });
+  }
+
+  @override
+  Future<void> setSyncInterval(int second) {
+    final result = Completer<void>();
+    final channel = task.createChannel(name: ChannelName.setSyncInterval.name);
+    channel.listen((message, channel) async {
+      result.complete();
+    });
+    channel.send('');
+
+    return result.future;
   }
 }

@@ -12,4 +12,5 @@ enum ChannelName {
   disconnect,
   afterSync,
   beforeSync,
+  setSyncInterval,
 }

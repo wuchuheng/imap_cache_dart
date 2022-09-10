@@ -13,7 +13,7 @@ void main() {
     final value = 'hello';
     test('Init', () async {
       final file = '${Directory.current.path}/test/.env';
-      DotEnv(file: file);
+      DotEnv(path: file);
       final directory = DotEnv.get('LOCAL_CACHE_DIRECTORY', '');
       final path = '$directory/localCache';
       if (await Directory(path).exists()) {
