@@ -11,7 +11,6 @@ import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 
 import '../../wuchuheng_imap_cache.dart';
-import '../dto/connect_config/index.dart';
 import '../dto/isolate_request/index.dart';
 
 typedef IsolateCallback = ReceivePort Function(IsolateRequest isolateData);
@@ -31,11 +30,7 @@ Future<Task> middleware() async {
     final ChannelName channelName = enumFromString<ChannelName>(ChannelName.values, channel.name);
     switch (channelName) {
       case ChannelName.connect:
-        try {
-          await imapCacheService.connectToServer(ConnectConfig.fromJson(jsonDecode(message)));
-        } catch (error) {
-          throw error;
-        }
+        await imapCacheService.connectToServer(ConnectConfig.fromJson(jsonDecode(message)));
         channel.send('');
         break;
       case ChannelName.set:
@@ -79,8 +74,16 @@ Future<Task> middleware() async {
       case ChannelName.beforeSync:
         onBeforeSync(channel, imapCacheService, message);
         break;
+      case ChannelName.setSyncInterval:
+        onSetSyncInterval(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+void onSetSyncInterval(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {
+  imapCacheService.setSyncInterval(int.parse(message));
+  channel.send('');
 }
 
 void onBeforeSync(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {

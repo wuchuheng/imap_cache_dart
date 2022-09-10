@@ -96,9 +96,15 @@ void main() {
       expect(callback2, isTrue);
       expect(afterUnsetKey, key);
     }, timeout: Timeout(Duration(seconds: 60)));
-
-    test('Duration', () async {
-      await Future.delayed(Duration(seconds: 60));
-    });
+    test('setSyncInterval test', () async {
+      final syncIntervalSeconds = 20;
+      late int expectValue;
+      imapCache.beforeSync((duration) {
+        expectValue = duration.inSeconds;
+      });
+      imapCache.setSyncInterval(syncIntervalSeconds);
+      await Future.delayed(Duration(seconds: syncIntervalSeconds * 2));
+      expect(syncIntervalSeconds, expectValue);
+    }, timeout: Timeout(Duration(seconds: 41)));
   });
 }

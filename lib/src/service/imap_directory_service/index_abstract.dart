@@ -11,8 +11,6 @@ abstract class ImapDirectoryServiceAbstract {
 
   Future<String?> getFileByUid(int uid);
 
-  Future<List<String>> getFileNamesByDateTime(DateTime dateTime);
-
   String get path;
 
   Future<void> createFile({required String fileName, required String content});

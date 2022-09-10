@@ -134,12 +134,6 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
   }
 
   @override
-  Future<List<String>> getFileNamesByDateTime(DateTime dateTime) {
-    // TODO: implement getFileNamesByDateTime
-    throw UnimplementedError();
-  }
-
-  @override
   String get path => _path;
 
   @override

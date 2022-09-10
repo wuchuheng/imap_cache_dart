@@ -21,10 +21,11 @@ class SyncServiceI implements SyncService {
   final afterCompletedSubject = SubjectHook<Duration>();
   bool _isInit = false;
   bool _isRunning = false;
-  late Duration _syncDurationSeconds;
   late ImapClientService _imapClientService;
+  late int _syncIntervalSeconds;
+
   SyncServiceI(this._config, this._localSQLite, this._imapCache) {
-    _syncDurationSeconds = Duration(seconds: _config.syncDurationSeconds);
+    _syncIntervalSeconds = _config.syncIntervalSeconds;
   }
 
   Future<void> _init(ConnectConfig config) async {
@@ -43,7 +44,7 @@ class SyncServiceI implements SyncService {
     _imapDirectoryService = imapDirectoryService;
     if (!await _imapDirectoryService.exists()) {
       await _imapDirectoryService.create();
-      await Future.delayed(_syncDurationSeconds);
+      await Future.delayed(Duration(seconds: 5));
     }
   }
 
@@ -61,17 +62,17 @@ class SyncServiceI implements SyncService {
     syncData() async {
       if (!_isRunning) return;
       try {
-        beforeStartSubject.next(_syncDurationSeconds);
+        beforeStartSubject.next(Duration(seconds: _syncIntervalSeconds));
         await OnlineSyncToLocalServiceI(
           imapDirectoryService: _imapDirectoryService,
           localSQLite: _localSQLite,
           imapCache: _imapCache,
         ).start();
-        afterCompletedSubject.next(_syncDurationSeconds);
+        afterCompletedSubject.next(Duration(seconds: _syncIntervalSeconds));
       } catch (e) {
         Logger.error(e.toString());
       }
-      Timer(Duration(seconds: 5), () async {
+      Timer(Duration(seconds: _syncIntervalSeconds), () async {
         await syncData();
       });
     }
@@ -99,4 +100,7 @@ class SyncServiceI implements SyncService {
       callback(value);
     });
   }
+
+  @override
+  Future<void> setSyncInterval(int second) async => _syncIntervalSeconds = second;
 }

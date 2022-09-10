@@ -74,3 +74,8 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 1.0.3
 - feat: add the sync subscribe method.
+
+## 1.0.4
+- fix: Fix the exception not being thrown normally when asynchronous
+- feat: add the setSyncInterval API.
+

@@ -107,8 +107,5 @@ class ImapCacheServiceI implements ImapCacheService {
   hook.Unsubscribe beforeSync(void Function(Duration duration) callback) => beforeSyncSubject.subscribe(callback);
 
   @override
-  Future<void> setSyncInterval(int second) {
-    // TODO: implement setSyncInterval
-    throw UnimplementedError();
-  }
+  Future<void> setSyncInterval(int second) async => await _syncService.setSyncInterval(second);
 }

@@ -200,8 +200,9 @@ class ImapCache implements ImapCacheService {
     final channel = task.createChannel(name: ChannelName.setSyncInterval.name);
     channel.listen((message, channel) async {
       result.complete();
+      channel.close();
     });
-    channel.send('');
+    channel.send(second.toString());
 
     return result.future;
   }
