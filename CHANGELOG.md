@@ -79,3 +79,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 - fix: Fix the exception not being thrown normally when asynchronous
 - feat: add the setSyncInterval API.
 
+## 1.0.5
+
+- chore: updated version.
