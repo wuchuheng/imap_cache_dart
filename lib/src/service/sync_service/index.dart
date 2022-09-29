@@ -70,6 +70,10 @@ class SyncServiceI implements SyncService {
         ).start();
         afterCompletedSubject.next(Duration(seconds: _syncIntervalSeconds));
       } catch (e) {
+        // TODO 需要重新连接
+        if (e == null) {
+          // 需要重新连接
+        }
         Logger.error(e.toString());
       }
       Timer(Duration(seconds: _syncIntervalSeconds), () async {
