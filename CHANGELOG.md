@@ -82,3 +82,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.5
 
 - chore: updated version.
+
+## 1.0.6
+
+- fix: fix the exception cannot be report when the exception is empty
