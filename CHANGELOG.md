@@ -98,3 +98,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.9
 
 - feat: Add subscription events: onUpdate, onUpdated, onDownload, onDownloaded.
+
+## 1.0.10
+
+- chore: update sqlite3 version.
