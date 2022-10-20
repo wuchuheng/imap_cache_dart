@@ -90,3 +90,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.7
 
 - fix: fix the exception cannot be report when the exception is empty
+
+## 1.0.8
+- fix: fix the exception cannot be report when the exception is empty

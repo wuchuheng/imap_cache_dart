@@ -35,7 +35,7 @@ class ImapClientService implements ImapClientServiceAbstract {
       await client.login(userName, password);
     } catch (e) {
       Logger.error(e.toString());
-      rethrow;
+      throw Exception('Login failed.');
     }
     _client = client;
 
