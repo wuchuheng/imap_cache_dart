@@ -1,5 +1,5 @@
+import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
-import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 
 import '../utils/hash.dart';
 import 'cache_subscribe_consumer_abstract.dart';
@@ -15,54 +15,78 @@ class SubscriptionImp implements SubscriptionAbstract, CacheSubscribeConsumerAbs
   final Map<int, AfterUnsetCallback> _globalAfterUnsetSubscribeRegister = {};
 
   @override
-  UnsubscribeAbstract afterSet({String? key, required AfterSetCallback callback}) {
+  Unsubscribe afterSet({String? key, required AfterSetCallback callback}) {
     final id = DateTime.now().microsecondsSinceEpoch;
     if (key != null) {
       if (_afterSetSubscribeRegister.containsKey(key)) _afterSetSubscribeRegister[key] = {};
       _afterSetSubscribeRegister[key]![id] = callback;
-      return Unsubscribe(() => _afterSetSubscribeRegister[key]?.remove(id));
+      return Unsubscribe(() {
+        _afterSetSubscribeRegister[key]?.remove(id);
+        return true;
+      });
     } else {
       _globalAfterSetSubscribeRegister[id] = callback;
-      return Unsubscribe(() => _globalAfterSetSubscribeRegister.remove(id));
+      return Unsubscribe(() {
+        _globalAfterSetSubscribeRegister.remove(id);
+        return true;
+      });
     }
   }
 
   @override
-  UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback}) {
+  Unsubscribe beforeSet({String? key, required BeforeSetCallback callback}) {
     final id = DateTime.now().microsecondsSinceEpoch;
     if (key != null) {
       if (!_beforeSetSubscribeRegister.containsKey(key)) _beforeSetSubscribeRegister[key] = {};
       _beforeSetSubscribeRegister[key]![id] = callback;
-      return Unsubscribe(() => _beforeSetSubscribeRegister[key]?.remove(id));
+      return Unsubscribe(() {
+        _beforeSetSubscribeRegister[key]?.remove(id);
+        return true;
+      });
     } else {
       _globalBeforeSetSubscribeRegister[id] = callback;
-      return Unsubscribe(() => _globalBeforeSetSubscribeRegister.remove(id));
+      return Unsubscribe(() {
+        _globalBeforeSetSubscribeRegister.remove(id);
+        return true;
+      });
     }
   }
 
   @override
-  UnsubscribeAbstract beforeUnset({String? key, required BeforeUnsetCallback callback}) {
+  Unsubscribe beforeUnset({String? key, required BeforeUnsetCallback callback}) {
     final id = DateTime.now().microsecondsSinceEpoch;
     if (key != null) {
       if (!_beforeUnsetSubscribeRegister.containsKey(key)) _beforeUnsetSubscribeRegister[key] = {};
       _beforeUnsetSubscribeRegister[key]![id] = callback;
-      return Unsubscribe(() => _beforeUnsetSubscribeRegister[key]?.remove(id));
+      return Unsubscribe(() {
+        _beforeUnsetSubscribeRegister[key]?.remove(id);
+        return true;
+      });
     } else {
       _globalBeforeUnsetSubscribeRegister[id] = callback;
-      return Unsubscribe(() => _globalBeforeUnsetSubscribeRegister.remove(id));
+      return Unsubscribe(() {
+        _globalBeforeUnsetSubscribeRegister.remove(id);
+        return true;
+      });
     }
   }
 
   @override
-  UnsubscribeAbstract afterUnset({String? key, required AfterUnsetCallback callback}) {
+  Unsubscribe afterUnset({String? key, required AfterUnsetCallback callback}) {
     final id = DateTime.now().microsecondsSinceEpoch;
     if (key != null) {
       if (_afterUnsetSubscribeRegister.containsKey(key)) _afterUnsetSubscribeRegister[key] = {};
       _afterUnsetSubscribeRegister[key]![id] = callback;
-      return Unsubscribe(() => _afterUnsetSubscribeRegister[key]?.remove(id));
+      return Unsubscribe(() {
+        _afterUnsetSubscribeRegister[key]?.remove(id);
+        return true;
+      });
     } else {
       _globalAfterUnsetSubscribeRegister[id] = callback;
-      return Unsubscribe(() => _globalAfterUnsetSubscribeRegister.remove(id));
+      return Unsubscribe(() {
+        _globalAfterUnsetSubscribeRegister.remove(id);
+        return true;
+      });
     }
   }
 

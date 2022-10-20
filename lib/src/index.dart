@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:wuchuheng_hooks/wuchuheng_hooks.dart' as hook;
+import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
 import 'package:wuchuheng_imap_cache/src/dto/before_unset/result_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/dto/callback_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
@@ -10,7 +11,6 @@ import 'package:wuchuheng_imap_cache/src/middleware/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:wuchuheng_imap_cache/src/service/sync_service/sync_event.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
-import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
@@ -38,7 +38,7 @@ class ImapCache implements ImapCacheService {
   }
 
   @override
-  UnsubscribeAbstract afterSet({String? key, required AfterSetCallback callback}) {
+  Unsubscribe afterSet({String? key, required AfterSetCallback callback}) {
     final channel = task.createChannel(name: ChannelName.afterSet.name);
     channel.listen((message, channel) async {
       final callbackData = CallbackData.fromJson(jsonDecode(message));
@@ -49,11 +49,12 @@ class ImapCache implements ImapCacheService {
     channel.onError((e) => throw e);
     return Unsubscribe(() {
       channel.close();
+      return true;
     });
   }
 
   @override
-  UnsubscribeAbstract afterUnset({String? key, required AfterUnsetCallback callback}) {
+  Unsubscribe afterUnset({String? key, required AfterUnsetCallback callback}) {
     final channel = task.createChannel(name: ChannelName.afterUnset.name);
     channel.listen((message, channel) async {
       await callback(key: message);
@@ -61,11 +62,14 @@ class ImapCache implements ImapCacheService {
     });
     channel.send(key ?? '');
     channel.onError((e) => throw e);
-    return Unsubscribe(() => channel.close());
+    return Unsubscribe(() {
+      channel.close();
+      return true;
+    });
   }
 
   @override
-  UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback}) {
+  Unsubscribe beforeSet({String? key, required BeforeSetCallback callback}) {
     final channel = task.createChannel(name: ChannelName.beforeSet.name);
     channel.listen((message, channel) async {
       final callbackData = CallbackData.fromJson(jsonDecode(message));
@@ -75,11 +79,14 @@ class ImapCache implements ImapCacheService {
     });
     channel.send(key ?? '');
     channel.onError((e) => throw e);
-    return Unsubscribe(() => channel.close());
+    return Unsubscribe(() {
+      channel.close();
+      return true;
+    });
   }
 
   @override
-  UnsubscribeAbstract beforeUnset({String? key, required BeforeUnsetCallback callback}) {
+  Unsubscribe beforeUnset({String? key, required BeforeUnsetCallback callback}) {
     final channel = task.createChannel(name: ChannelName.beforeUnset.name);
     channel.listen((message, channel) async {
       final result = await callback(key: message);
@@ -88,7 +95,10 @@ class ImapCache implements ImapCacheService {
     });
     channel.send(key ?? '');
     channel.onError((e) => throw e);
-    return Unsubscribe(() => channel.close());
+    return Unsubscribe(() {
+      channel.close();
+      return true;
+    });
   }
 
   @override
@@ -137,7 +147,7 @@ class ImapCache implements ImapCacheService {
   final hook.SubjectHook<LoggerItem> _subjectHook = hook.SubjectHook();
 
   @override
-  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback) {
+  Unsubscribe subscribeLog(void Function(LoggerItem loggerItem) callback) {
     final result = _subjectHook.subscribe((value) => callback(value));
     final channel = task.createChannel(name: ChannelName.subjectLog.name);
     channel.listen((message, channel) async {
@@ -150,6 +160,7 @@ class ImapCache implements ImapCacheService {
     return Unsubscribe(() {
       result.unsubscribe();
       channel.close();
+      return true;
     });
   }
 

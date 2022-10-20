@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:wuchuheng_hooks/wuchuheng_hooks.dart' as hook;
+import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
 import 'package:wuchuheng_imap_cache/src/dto/connect_config/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index_abstarct.dart';
 import 'package:wuchuheng_imap_cache/src/service/local_cache_service/local_cache_service.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
-import 'package:wuchuheng_imap_cache/src/subscription/unsubscribe.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/local_sqlite.dart';
@@ -76,29 +76,30 @@ class ImapCacheServiceI implements ImapCacheService {
   Future<String?> has({required String key}) => _localCacheService.has(key: key);
 
   @override
-  UnsubscribeAbstract afterUnset({String? key, required AfterUnsetCallback callback}) =>
+  hook.Unsubscribe afterUnset({String? key, required AfterUnsetCallback callback}) =>
       _subscriptionImp.afterUnset(key: key, callback: callback);
 
   @override
-  UnsubscribeAbstract beforeUnset({String? key, required BeforeUnsetCallback callback}) =>
+  hook.Unsubscribe beforeUnset({String? key, required BeforeUnsetCallback callback}) =>
       _subscriptionImp.beforeUnset(key: key, callback: callback);
 
   @override
-  UnsubscribeAbstract afterSet({String? key, required AfterSetCallback callback}) =>
+  hook.Unsubscribe afterSet({String? key, required AfterSetCallback callback}) =>
       _subscriptionImp.afterSet(key: key, callback: callback);
 
   @override
-  UnsubscribeAbstract beforeSet({String? key, required BeforeSetCallback callback}) =>
+  hook.Unsubscribe beforeSet({String? key, required BeforeSetCallback callback}) =>
       _subscriptionImp.beforeSet(key: key, callback: callback);
 
   @override
-  UnsubscribeAbstract subscribeLog(void Function(LoggerItem loggerItem) callback) {
+  hook.Unsubscribe subscribeLog(void Function(LoggerItem loggerItem) callback) {
     final subscribe = Logger.subscribe((value) {
       callback(value);
     });
 
     return Unsubscribe(() {
       subscribe.unsubscribe();
+      return true;
     });
   }
 
