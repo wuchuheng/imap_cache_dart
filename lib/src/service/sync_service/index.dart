@@ -4,12 +4,12 @@ import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
 import 'package:wuchuheng_imap_cache/src/dao/local_sqlite.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_client_service/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_directory_service/index.dart';
-import 'package:wuchuheng_imap_cache/src/service/sync_service/online_sync_to_local_service/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/sync_service/sync_service.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dto/connect_config/index.dart';
 import '../imap_cache_service/index.dart';
+import 'IMAP_sync_service/index.dart';
 import 'sync_event.dart';
 
 class SyncServiceI implements SyncService {
@@ -19,6 +19,10 @@ class SyncServiceI implements SyncService {
   final ImapCacheServiceI _imapCache;
   final beforeStartSubject = SubjectHook<Duration>();
   final afterCompletedSubject = SubjectHook<Duration>();
+  final onUpdateSubject = SubjectHook<void>();
+  final onUpdatedSubject = SubjectHook<void>();
+  final onDownloadSubject = SubjectHook<void>();
+  final onDownloadedSubject = SubjectHook<void>();
   bool _isInit = false;
   bool _isRunning = false;
   late ImapClientService _imapClientService;
@@ -63,18 +67,23 @@ class SyncServiceI implements SyncService {
       if (!_isRunning) return;
       try {
         beforeStartSubject.next(Duration(seconds: _syncIntervalSeconds));
-        await OnlineSyncToLocalServiceI(
+        await IMAPSyncServiceI(
           imapDirectoryService: _imapDirectoryService,
           localSQLite: _localSQLite,
           imapCache: _imapCache,
+          onUpdate: () => onUpdateSubject.next(null),
+          onUpdated: () => onUpdatedSubject.next(null),
+          onDownload: () => onDownloadSubject.next(null),
+          onDownloaded: () => onDownloadedSubject.next(null),
         ).start();
         afterCompletedSubject.next(Duration(seconds: _syncIntervalSeconds));
-      } catch (e) {
+      } catch (e, stack) {
         // TODO 需要重新连接
         if (e == null) {
           // 需要重新连接
         }
         Logger.error(e.toString());
+        print(stack);
       }
       Timer(Duration(seconds: _syncIntervalSeconds), () async {
         await syncData();
@@ -107,4 +116,16 @@ class SyncServiceI implements SyncService {
 
   @override
   Future<void> setSyncInterval(int second) async => _syncIntervalSeconds = second;
+
+  @override
+  Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value) => callback());
+
+  @override
+  Unsubscribe onUpdated(void Function() callback) => onUpdatedSubject.subscribe((value) => callback());
+
+  @override
+  Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value) => callback());
+
+  @override
+  Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value) => callback());
 }

@@ -13,4 +13,8 @@ enum ChannelName {
   afterSync,
   beforeSync,
   setSyncInterval,
+  onUpdate,
+  onUpdated,
+  onDownload,
+  onDownloaded,
 }

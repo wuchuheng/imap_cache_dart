@@ -96,6 +96,49 @@ void main() {
       expect(callback2, isTrue);
       expect(afterUnsetKey, key);
     }, timeout: Timeout(Duration(seconds: 60)));
+
+    test('Event test for onUpdate and onUpdated.', () async {
+      final syncIntervalSeconds = 5;
+      bool isUpdate = false;
+      bool isCompleteUpdate = false;
+      imapCache.onUpdate(() => isUpdate = true);
+      imapCache.onUpdated(() => isCompleteUpdate = true);
+      imapCache.setSyncInterval(syncIntervalSeconds);
+      imapCache.set(key: 'testForOnUpdateEvent', value: 'testForOnUpdateEvent');
+      await Future.delayed(Duration(seconds: 10));
+      expect(isUpdate, true);
+      expect(isCompleteUpdate, true);
+    }, timeout: Timeout(Duration(seconds: 12)));
+
+    test('Event test for onDownload and onDownloaded.', () async {
+      bool isDownload = false;
+      bool isDownloaded = false;
+      imapCache.onDownload(() => isDownload = true);
+      imapCache.onDownloaded(() => isDownloaded = true);
+
+      const dir = "~/tmp/client2";
+      final config = ConnectConfig(
+        isDebug: DotEnv.get('IS_DEBUG', true),
+        userName: DotEnv.get('USER_NAME', ''),
+        password: DotEnv.get('PASSWORD', ''),
+        imapServerHost: DotEnv.get('HOST', ''),
+        imapServerPort: int.parse(DotEnv.get('PORT', '')),
+        isImapServerSecure: DotEnv.get('TLS', true),
+        syncIntervalSeconds: 5,
+        boxName: DotEnv.get('BOX_NAME', ''),
+        localCacheDirectory: dir,
+      );
+      if (Directory(dir).existsSync()) Directory(dir).delete(recursive: true);
+      Directory(dir).create(recursive: true);
+      final imapClient2 = await ImapCache().connectToServer(config);
+      imapClient2.set(key: 'tmp', value: DateTime.now().toString());
+      await Future.delayed(Duration(seconds: 10));
+      expect(isDownload, true);
+      expect(isDownloaded, true);
+      imapClient2.disconnect();
+      Directory(dir).delete(recursive: true);
+    }, timeout: Timeout(Duration(seconds: 12)));
+
     test('setSyncInterval test', () async {
       final syncIntervalSeconds = 20;
       late int expectValue;

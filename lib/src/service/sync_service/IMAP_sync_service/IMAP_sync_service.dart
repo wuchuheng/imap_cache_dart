@@ -1,4 +1,4 @@
-abstract class OnlineSyncToLocalService {
+abstract class IMAPSyncService {
   Future<void> start();
 
   Future<void> localSyncToOnline();

@@ -1,22 +1,30 @@
 import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
-import 'package:wuchuheng_imap_cache/src/service/sync_service/online_sync_to_local_service/online_sync_to_local_service.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../../dao/local_sqlite.dart';
 import '../../imap_cache_service/index.dart';
 import '../../imap_directory_service/index.dart';
+import 'IMAP_sync_service.dart';
 
-class OnlineSyncToLocalServiceI implements OnlineSyncToLocalService {
+class IMAPSyncServiceI implements IMAPSyncService {
   late ImapDirectoryService _imapDirectoryService;
   late LocalSQLite _localSQLite;
   late ImapCacheServiceI _imapCache;
+  final void Function() onUpdate;
+  final void Function() onUpdated;
+  final void Function() onDownload;
+  final void Function() onDownloaded;
 
-  OnlineSyncToLocalServiceI({
+  IMAPSyncServiceI({
+    required this.onUpdate,
     required ImapDirectoryService imapDirectoryService,
     required LocalSQLite localSQLite,
     required ImapCacheServiceI imapCache,
+    required this.onUpdated,
+    required this.onDownload,
+    required this.onDownloaded,
   }) {
     _imapCache = imapCache;
     _imapDirectoryService = imapDirectoryService;
@@ -35,6 +43,7 @@ class OnlineSyncToLocalServiceI implements OnlineSyncToLocalService {
   @override
   Future<void> localSyncToOnline() async {
     final localData = _localSQLite.cacheInfoDao().fetchLocal();
+    if (localData.isNotEmpty) onUpdate();
     for (final item in localData) {
       await _imapDirectoryService.createFile(fileName: item.symbol, content: item.value);
       Logger.info('Local -> online; key: ${item.key}; value: ${item.value}');
@@ -48,11 +57,13 @@ class OnlineSyncToLocalServiceI implements OnlineSyncToLocalService {
         _localSQLite.onlineCacheInfoDao().destroyByUid(onlineItem.uid);
       }
     }
+    if (localData.isNotEmpty) onUpdated();
   }
 
   @override
   Future<void> onlineSyncToLocal() async {
     final List<OnlineCacheInfoModel> onlineCacheInfoList = _localSQLite.onlineCacheInfoDao().fetch();
+    if (onlineCacheInfoList.isNotEmpty) onDownload();
     for (final onlineItem in onlineCacheInfoList) {
       final localItem = _localSQLite.cacheInfoDao().findByKey(key: onlineItem.key);
       if (localItem != null) {
@@ -68,6 +79,7 @@ class OnlineSyncToLocalServiceI implements OnlineSyncToLocalService {
         await _onlineSyncToLocalProcess(onlineCacheInfoModel: onlineItem);
       }
     }
+    if (onlineCacheInfoList.isNotEmpty) onDownloaded();
   }
 
   Future<void> _onlineSyncToLocalProcess({required OnlineCacheInfoModel onlineCacheInfoModel}) async {

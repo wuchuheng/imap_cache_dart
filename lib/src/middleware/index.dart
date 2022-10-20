@@ -77,8 +77,44 @@ Future<Task> middleware() async {
       case ChannelName.setSyncInterval:
         onSetSyncInterval(channel, imapCacheService, message);
         break;
+      case ChannelName.onUpdate:
+        onUpdate(channel, imapCacheService, message);
+        break;
+      case ChannelName.onUpdated:
+        onUpdated(channel, imapCacheService, message);
+        break;
+      case ChannelName.onDownload:
+        onDownload(channel, imapCacheService, message);
+        break;
+      case ChannelName.onDownloaded:
+        onDownloaded(channel, imapCacheService, message);
+        break;
     }
   });
+}
+
+/// The event to downloaded data from online to local.
+void onDownloaded(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
+  final unsubscribe = imapCacheService.onDownloaded(() => channel.send(''));
+  channel.onClose((value) => unsubscribe.unsubscribe());
+}
+
+/// The event to download data from online to local.
+void onDownload(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
+  final unsubscribe = imapCacheService.onDownload(() => channel.send(''));
+  channel.onClose((value) => unsubscribe.unsubscribe());
+}
+
+/// completed the uploading data to the server.
+void onUpdated(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
+  final unsubscribe = imapCacheService.onUpdated(() => channel.send(''));
+  channel.onClose((value) => unsubscribe.unsubscribe());
+}
+
+/// Start uploading data to the server.
+void onUpdate(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
+  final unsubscribe = imapCacheService.onUpdate(() => channel.send(''));
+  channel.onClose((value) => unsubscribe.unsubscribe());
 }
 
 void onSetSyncInterval(ChannelAbstract channel, ImapCacheService imapCacheService, String message) {

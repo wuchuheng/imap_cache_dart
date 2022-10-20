@@ -206,4 +206,52 @@ class ImapCache implements ImapCacheService {
 
     return result.future;
   }
+
+  @override
+  hook.Unsubscribe onUpdate(void Function() callback) {
+    final channel = task.createChannel(name: ChannelName.onUpdate.name);
+    channel.listen((message, channel) async => {callback()});
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
+  }
+
+  @override
+  hook.Unsubscribe onUpdated(void Function() callback) {
+    final channel = task.createChannel(name: ChannelName.onUpdated.name);
+    channel.listen((message, channel) async => {callback()});
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
+  }
+
+  @override
+  hook.Unsubscribe onDownload(void Function() callback) {
+    final channel = task.createChannel(name: ChannelName.onDownload.name);
+    channel.listen((message, channel) async => {callback()});
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
+  }
+
+  @override
+  hook.Unsubscribe onDownloaded(void Function() callback) {
+    final channel = task.createChannel(name: ChannelName.onDownloaded.name);
+    channel.listen((message, channel) async => {callback()});
+    channel.send('');
+
+    return hook.Unsubscribe(() {
+      channel.close();
+      return true;
+    });
+  }
 }

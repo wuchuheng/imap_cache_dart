@@ -14,11 +14,18 @@ import '../sync_service/index.dart';
 import '../sync_service/sync_service.dart';
 
 class ImapCacheServiceI implements ImapCacheService {
+  hook.SubjectHook<Duration> afterSyncSubject = hook.SubjectHook();
+  hook.SubjectHook<Duration> beforeSyncSubject = hook.SubjectHook();
+  hook.SubjectHook<void> onUpdateSubject = hook.SubjectHook();
+  hook.SubjectHook<void> onCompleteUpdateSubject = hook.SubjectHook();
+  hook.SubjectHook<void> onDownloadSubject = hook.SubjectHook();
+  hook.SubjectHook<void> onDownloadedSubject = hook.SubjectHook();
+  hook.UnsubscribeCollect unsubscribeCollect = hook.UnsubscribeCollect([]);
+
   late LocalCacheService _localCacheService;
   late SubscriptionImp _subscriptionImp;
   late LocalSQLite _localSQLite;
   late SyncService _syncService;
-  hook.UnsubscribeCollect unsubscribeCollect = hook.UnsubscribeCollect([]);
 
   /// connect to the IMAP server with user's account
   @override
@@ -32,6 +39,10 @@ class ImapCacheServiceI implements ImapCacheService {
     unsubscribeCollect = hook.UnsubscribeCollect([
       _syncService.afterSync(afterSyncSubject.next),
       _syncService.beforeSync(beforeSyncSubject.next),
+      _syncService.onUpdate(() => onUpdateSubject.next(null)),
+      _syncService.onUpdated(() => onCompleteUpdateSubject.next(null)),
+      _syncService.onDownload(() => onDownloadSubject.next(null)),
+      _syncService.onDownloaded(() => onDownloadedSubject.next(null)),
     ]);
     return this;
   }
@@ -97,9 +108,6 @@ class ImapCacheServiceI implements ImapCacheService {
     unsubscribeCollect.unsubscribe();
   }
 
-  hook.SubjectHook<Duration> afterSyncSubject = hook.SubjectHook();
-  hook.SubjectHook<Duration> beforeSyncSubject = hook.SubjectHook();
-
   @override
   hook.Unsubscribe afterSync(void Function(Duration duration) callback) => afterSyncSubject.subscribe(callback);
 
@@ -108,4 +116,16 @@ class ImapCacheServiceI implements ImapCacheService {
 
   @override
   Future<void> setSyncInterval(int second) async => await _syncService.setSyncInterval(second);
+
+  @override
+  hook.Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value) => callback());
+
+  @override
+  hook.Unsubscribe onUpdated(void Function() callback) => onCompleteUpdateSubject.subscribe((value) => callback());
+
+  @override
+  hook.Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value) => callback());
+
+  @override
+  hook.Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value) => callback());
 }
