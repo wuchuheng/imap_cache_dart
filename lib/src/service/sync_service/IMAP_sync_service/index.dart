@@ -3,6 +3,7 @@ import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
+import '../../../../wuchuheng_imap_cache.dart';
 import '../../../dao/local_sqlite.dart';
 import '../../imap_cache_service/index.dart';
 import '../../imap_directory_service/index.dart';
@@ -104,7 +105,7 @@ class IMAPSyncServiceI implements IMAPSyncService {
       _localSQLite.cacheInfoDao().save(cacheInfo);
       Logger.info('Online -> local; Data synchronization; key: ${onlineCacheInfoModel.key} value: $value');
     } else {
-      await _imapCache.set(key: cacheInfo.key, value: value);
+      await _imapCache.setWithFrom(key: cacheInfo.key, value: value, from: From.online);
       final CacheInfoModel localData = _localSQLite.cacheInfoDao().findByKey(key: onlineCacheInfoModel.key)!;
       localData.uid = onlineCacheInfoModel.uid;
       if (cacheInfo.value == value) {

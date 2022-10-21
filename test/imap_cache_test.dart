@@ -7,10 +7,32 @@ import 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 void main() {
+  Future<ImapCacheService> getClient(String dir) async {
+    final config = ConnectConfig(
+      isDebug: DotEnv.get('IS_DEBUG', true),
+      userName: DotEnv.get('USER_NAME', ''),
+      password: DotEnv.get('PASSWORD', ''),
+      imapServerHost: DotEnv.get('HOST', ''),
+      imapServerPort: int.parse(DotEnv.get('PORT', '')),
+      isImapServerSecure: DotEnv.get('TLS', true),
+      syncIntervalSeconds: 5,
+      boxName: DotEnv.get('BOX_NAME', ''),
+      localCacheDirectory: dir,
+    );
+    if (Directory(dir).existsSync()) Directory(dir).delete(recursive: true);
+    Directory(dir).create(recursive: true);
+
+    return await ImapCache().connectToServer(config);
+  }
+
+  Future<ImapCacheService> getClient1() async => await getClient('~/tmp/client1');
+  Future<ImapCacheService> getClient2() async => await getClient('~/tmp/client2');
+
   group('A group of tests', () {
     late ImapCacheService imapCache;
     final key = 'hello';
     final value = 'hello';
+
     test('Init', () async {
       final file = '${Directory.current.path}/test/.env';
       DotEnv(path: file);
@@ -48,24 +70,55 @@ void main() {
       await imapCache.set(key: 'hello', value: 'hello');
       expect(loggerItem != null, isTrue);
     });
-    test('SET afterSet beforeSet Test', () async {
+    test('Test event for afterSet and beforeSet.', () async {
       final String setKey = 'setKey';
       final expectValue = 'hello';
-      imapCache.beforeSet(callback: ({required key, required value, required hash}) async {
+      late From expectLocalBeforeSetFrom;
+      late From expectLocalAfterSetFrom;
+      final client1 = await getClient1();
+      client1.beforeSet(callback: ({required key, required value, required hash, required From from}) async {
         if (key == setKey) {
+          expectLocalBeforeSetFrom = from;
           return expectValue;
         }
         return value;
       });
       String expectAfterValue = '';
-      imapCache.afterSet(callback: ({required key, required value, required hash}) async {
+      client1.afterSet(callback: ({required key, required value, required hash, required From from}) async {
         expectAfterValue = value;
+        expectLocalAfterSetFrom = from;
       });
-      await imapCache.set(key: key, value: value);
-      await imapCache.set(key: setKey, value: 'tmp');
-      expect(await imapCache.get(key: setKey), expectValue);
+      await client1.set(key: key, value: value);
+      await client1.set(key: setKey, value: 'tmp');
+      expect(await client1.get(key: setKey), expectValue);
       expect(expectAfterValue, expectValue);
+      expect(expectLocalAfterSetFrom, From.local);
+      expect(expectLocalBeforeSetFrom, From.local);
+
+      late From expectOnlineBeforeSetFrom;
+      late From expectOnlineAfterSetFrom;
+      final client2SetKey = 'clientkey';
+      final client2SetValue = DateTime.now().toString();
+      final client2 = await getClient2();
+      client1.beforeSet(callback: ({required key, required value, required hash, required From from}) async {
+        if (key == client2SetKey) {
+          expectOnlineBeforeSetFrom = from;
+        }
+        return value;
+      });
+      client1.afterSet(callback: ({required key, required value, required hash, required From from}) async {
+        if (key == client2SetKey) {
+          expectOnlineAfterSetFrom = from;
+        }
+      });
+      client2.set(key: client2SetKey, value: client2SetValue);
+      await Future.delayed(Duration(seconds: 20));
+      expect(expectOnlineAfterSetFrom, From.online);
+      expect(expectOnlineBeforeSetFrom, From.online);
+      client1.disconnect();
+      client2.disconnect();
     });
+
     test('GET Test', () async {
       final result = await imapCache.get(key: key);
       expect(result, value);
@@ -115,28 +168,12 @@ void main() {
       bool isDownloaded = false;
       imapCache.onDownload(() => isDownload = true);
       imapCache.onDownloaded(() => isDownloaded = true);
-
-      const dir = "~/tmp/client2";
-      final config = ConnectConfig(
-        isDebug: DotEnv.get('IS_DEBUG', true),
-        userName: DotEnv.get('USER_NAME', ''),
-        password: DotEnv.get('PASSWORD', ''),
-        imapServerHost: DotEnv.get('HOST', ''),
-        imapServerPort: int.parse(DotEnv.get('PORT', '')),
-        isImapServerSecure: DotEnv.get('TLS', true),
-        syncIntervalSeconds: 5,
-        boxName: DotEnv.get('BOX_NAME', ''),
-        localCacheDirectory: dir,
-      );
-      if (Directory(dir).existsSync()) Directory(dir).delete(recursive: true);
-      Directory(dir).create(recursive: true);
-      final imapClient2 = await ImapCache().connectToServer(config);
-      imapClient2.set(key: 'tmp', value: DateTime.now().toString());
+      final client1 = await getClient1();
+      client1.set(key: 'tmp', value: DateTime.now().toString());
       await Future.delayed(Duration(seconds: 10));
       expect(isDownload, true);
       expect(isDownloaded, true);
-      imapClient2.disconnect();
-      Directory(dir).delete(recursive: true);
+      client1.disconnect();
     }, timeout: Timeout(Duration(seconds: 12)));
 
     test('setSyncInterval test', () async {
@@ -149,5 +186,9 @@ void main() {
       await Future.delayed(Duration(seconds: syncIntervalSeconds * 2));
       expect(syncIntervalSeconds, expectValue);
     }, timeout: Timeout(Duration(seconds: 41)));
+    test('Dispose', () async {
+      const dir = '~/';
+      if (Directory(dir).existsSync()) Directory(dir).delete(recursive: true);
+    });
   });
 }

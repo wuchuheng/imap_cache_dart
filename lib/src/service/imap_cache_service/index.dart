@@ -48,11 +48,14 @@ class ImapCacheServiceI implements ImapCacheService {
   }
 
   @override
-  Future<void> set({required String key, required String value}) async {
+  Future<void> set({required String key, required String value}) async =>
+      await setWithFrom(key: key, value: value, from: From.local);
+
+  Future<void> setWithFrom({required String key, required String value, required From from}) async {
     Logger.info('Before setting the cache. key:$key value: $value');
-    value = await _subscriptionImp.beforeSetSubscribeConsume(key: key, value: value);
+    value = await _subscriptionImp.beforeSetSubscribeConsume(key: key, value: value, from: from);
     _localCacheService.set(key: key, value: value);
-    _subscriptionImp.afterSetSubscribeConsume(key: key, value: value);
+    _subscriptionImp.afterSetSubscribeConsume(key: key, value: value, from: from);
     Logger.info('After setting the cache. key:$key value: $value');
   }
 

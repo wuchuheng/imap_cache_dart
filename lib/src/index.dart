@@ -42,7 +42,12 @@ class ImapCache implements ImapCacheService {
     final channel = task.createChannel(name: ChannelName.afterSet.name);
     channel.listen((message, channel) async {
       final callbackData = CallbackData.fromJson(jsonDecode(message));
-      await callback(key: callbackData.key, value: callbackData.value, hash: callbackData.hash);
+      await callback(
+        key: callbackData.key,
+        value: callbackData.value,
+        hash: callbackData.hash,
+        from: callbackData.from,
+      );
       channel.send('');
     });
     channel.send(key ?? '');
@@ -73,7 +78,12 @@ class ImapCache implements ImapCacheService {
     final channel = task.createChannel(name: ChannelName.beforeSet.name);
     channel.listen((message, channel) async {
       final callbackData = CallbackData.fromJson(jsonDecode(message));
-      final newResult = await callback(key: callbackData.key, value: callbackData.value, hash: callbackData.hash);
+      final newResult = await callback(
+        key: callbackData.key,
+        value: callbackData.value,
+        hash: callbackData.hash,
+        from: callbackData.from,
+      );
       callbackData.value = newResult;
       channel.send(jsonEncode(callbackData));
     });
