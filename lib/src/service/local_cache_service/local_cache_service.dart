@@ -8,8 +8,8 @@ import '../../utils/symbol_util/cache_symbol_util.dart';
 import '../imap_cache_service/cache_abstract.dart';
 
 class LocalCacheService implements CacheAbstract {
+  /// todo delete
   final LocalSQLite _localSQLite;
-
   LocalCacheService(this._localSQLite);
 
   @override

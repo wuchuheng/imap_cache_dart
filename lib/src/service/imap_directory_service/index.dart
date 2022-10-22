@@ -1,5 +1,6 @@
 import 'package:enough_mail/enough_mail.dart';
 import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
+import 'package:wuchuheng_imap_cache/src/errors/not_found_email_error.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_client_service/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_directory_service/index_abstract.dart';
@@ -80,6 +81,9 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
     Logger.info('Get online data by uid: $uid');
     ImapClient client = await _imapClientService.getClient();
     final data = await client.uidFetchMessage(uid, 'BODY[]');
+    if (data.messages.isEmpty) {
+      throw NotFoundEmailError();
+    }
     String? body = data.messages[0].decodeTextPlainPart();
     return body!.replaceAll(RegExp(r'\r\n'), '');
   }
@@ -87,10 +91,8 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
   @override
   Future<List<SubjectInfo>> getFiles() async {
     final client = await _imapClientService.getClient();
-    final uid = _localSQLite.cacheInfoDao().fetchLastUid();
-    final MessageSequence sequence = MessageSequence.fromRangeToLast(
-      uid,
-    );
+    final uid = _localSQLite.onlineCacheInfoDao().fetchLastUid();
+    final MessageSequence sequence = MessageSequence.fromRangeToLast(uid);
 
     final FetchImapResult onlineData = await client.uidFetchMessages(sequence, 'BODY.PEEK[HEADER.FIELDS (subject)]');
     final List<SubjectInfo> result = [];

@@ -1,3 +1,5 @@
+import 'package:drift/drift.dart';
+
 class CacheInfoModel {
   static String tableName = 'cache_info';
   int uid;
@@ -16,4 +18,17 @@ class CacheInfoModel {
       required this.key,
       required this.hash,
       this.deletedAt});
+}
+
+class CacheInfo extends Table {
+  TextColumn get key => text()();
+  IntColumn get uid => integer()();
+  TextColumn get value => text().nullable()();
+  TextColumn get hash => text().nullable()();
+  TextColumn get symbol => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {key};
 }

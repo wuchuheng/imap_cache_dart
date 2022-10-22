@@ -9,6 +9,7 @@ import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
+import '../../dao/db.dart';
 import '../../dao/local_sqlite.dart';
 import '../sync_service/index.dart';
 import '../sync_service/sync_service.dart';
@@ -31,7 +32,9 @@ class ImapCacheServiceI implements ImapCacheService {
   @override
   Future<ImapCacheService> connectToServer(ConnectConfig config) async {
     Logger.debugger = config.isDebug;
-    _localSQLite = await LocalSQLite().init(userName: config.userName, localCacheDirectory: config.localCacheDirectory);
+    final _DB = DB(DBStoreDir: '${config.localCacheDirectory}/localCache/${config.userName}');
+    _localSQLite =
+        await LocalSQLite(_DB).init(userName: config.userName, localCacheDirectory: config.localCacheDirectory);
     _localCacheService = LocalCacheService(_localSQLite);
     _subscriptionImp = SubscriptionImp();
     _syncService = SyncServiceI(config, _localSQLite, this);

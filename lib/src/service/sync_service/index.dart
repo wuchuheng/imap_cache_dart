@@ -15,6 +15,7 @@ import 'sync_event.dart';
 class SyncServiceI implements SyncService {
   late ImapDirectoryService _imapDirectoryService;
   final ConnectConfig _config;
+  // todo delete
   final LocalSQLite _localSQLite;
   final ImapCacheServiceI _imapCache;
   final beforeStartSubject = SubjectHook<Duration>();

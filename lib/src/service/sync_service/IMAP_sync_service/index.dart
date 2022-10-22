@@ -1,4 +1,5 @@
 import 'package:wuchuheng_imap_cache/src/dto/subject_info.dart';
+import 'package:wuchuheng_imap_cache/src/errors/not_found_email_error.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
@@ -71,13 +72,21 @@ class IMAPSyncServiceI implements IMAPSyncService {
         final localTime = localItem.updatedAt.microsecondsSinceEpoch;
         final onlineTime = onlineItem.updatedAt.microsecondsSinceEpoch;
         if (localTime < onlineTime) {
-          await _onlineSyncToLocalProcess(onlineCacheInfoModel: onlineItem);
+          try {
+            await _onlineSyncToLocalProcess(onlineCacheInfoModel: onlineItem);
+          } on NotFoundEmailError {
+            continue;
+          }
         } else if (localTime == onlineTime && localItem.uid < onlineItem.uid) {
           localItem.uid = onlineItem.uid;
           _localSQLite.cacheInfoDao().save(localItem);
         }
       } else {
-        await _onlineSyncToLocalProcess(onlineCacheInfoModel: onlineItem);
+        try {
+          await _onlineSyncToLocalProcess(onlineCacheInfoModel: onlineItem);
+        } on NotFoundEmailError {
+          continue;
+        }
       }
     }
     if (onlineCacheInfoList.isNotEmpty) onDownloaded();
@@ -87,10 +96,12 @@ class IMAPSyncServiceI implements IMAPSyncService {
     String value = '';
     try {
       value = await _imapDirectoryService.getFileByUid(onlineCacheInfoModel.uid) as String;
-    } catch (e) {
+    } catch (e, track) {
       Logger.error(
         'Failed to fetch online data, uid: ${onlineCacheInfoModel.uid}; symbol: ${onlineCacheInfoModel.symbol}',
       );
+      print(track);
+      rethrow;
     }
 
     final cacheInfo = CacheInfoModel(

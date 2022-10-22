@@ -6,8 +6,11 @@ import 'package:wuchuheng_imap_cache/src/dao/online_cache_info_dao/index.dart';
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 
 import '../model/cache_info_model/index.dart';
+import 'db.dart';
 
 class LocalSQLite {
+  DB _DB;
+  LocalSQLite(this._DB);
   Database? _db;
   Database getDb() {
     if (_db == null) throw Error();
@@ -58,7 +61,7 @@ class LocalSQLite {
     return this;
   }
 
-  CacheInfoDao cacheInfoDao() => CacheInfoDao(db: getDb());
+  CacheInfoDao cacheInfoDao() => CacheInfoDao(getDb: () => getDb(), DB: _DB);
 
-  OnlineCacheInfoDao onlineCacheInfoDao() => OnlineCacheInfoDao(db: getDb());
+  OnlineCacheInfoDao onlineCacheInfoDao() => OnlineCacheInfoDao(getDb: () => getDb(), DB: _DB);
 }

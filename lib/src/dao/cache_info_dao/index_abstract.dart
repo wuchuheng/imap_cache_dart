@@ -6,4 +6,5 @@ abstract class CacheInfoDaoAbstract {
   CacheInfoModel? findByKeyWithoutSoftDelete({required String key});
   void destroyByKey({required String key});
   List<CacheInfoModel> fetchLocal();
+  int fetchLastUid();
 }

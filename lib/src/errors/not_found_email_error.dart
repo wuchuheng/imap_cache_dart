@@ -1,0 +1,1 @@
+class NotFoundEmailError extends Error {}
