@@ -85,9 +85,8 @@ class SyncServiceI implements SyncService {
         Logger.error(e.toString());
         print(stack);
       }
-      Timer(Duration(seconds: _syncIntervalSeconds), () async {
-        await syncData();
-      });
+      await Future.delayed(Duration(seconds: _syncIntervalSeconds));
+      await syncData();
     }
 
     syncData();
