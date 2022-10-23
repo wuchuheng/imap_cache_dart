@@ -33,6 +33,9 @@ class CacheSymbolUtil {
     key = listStr[1];
     updatedAt = DateTime.fromMicrosecondsSinceEpoch(int.parse(listStr[2]));
     hash = listStr[3];
+    hash = hash.replaceAll(RegExp(r'\r\n'), '');
+    hash = hash.replaceAll(RegExp(r'\s+'), '');
+
     if (listStr[4].isNotEmpty) deletedAt = DateTime.fromMicrosecondsSinceEpoch(int.parse(listStr[4]));
   }
 }

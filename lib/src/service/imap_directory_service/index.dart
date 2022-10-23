@@ -7,7 +7,7 @@ import 'package:wuchuheng_imap_cache/src/service/imap_directory_service/index_ab
 import 'package:wuchuheng_imap_cache/src/utils/symbol_util/cache_symbol_util.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
-import '../../dao/local_sqlite.dart';
+import '../../dao/db.dart';
 
 class ImapDirectoryService implements ImapDirectoryServiceAbstract {
   late String _path;
@@ -91,7 +91,7 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
   @override
   Future<List<SubjectInfo>> getFiles() async {
     final client = await _imapClientService.getClient();
-    final uid = _localSQLite.onlineCacheInfoDao().fetchLastUid();
+    final uid = await _localSQLite.onlineCacheInfoDao().fetchLastUid();
     final MessageSequence sequence = MessageSequence.fromRangeToLast(uid);
 
     final FetchImapResult onlineData = await client.uidFetchMessages(sequence, 'BODY.PEEK[HEADER.FIELDS (subject)]');
@@ -101,10 +101,8 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
       message.sequenceId;
       String? symbol = message.getHeaderValue('Subject');
       if (symbol != null) {
-        symbol = symbol.replaceAll(RegExp(r'\r\n'), '');
-        CacheInfoModel? cacheInfo = _localSQLite.cacheInfoDao().findBySymbol(symbol);
+        symbol = CacheSymbolUtil.fromSymbol(symbol).toString();
         final SubjectInfo subjectInfo = SubjectInfo(message.uid!, CacheSymbolUtil.fromSymbol(symbol));
-        if (cacheInfo == null) result.add(subjectInfo);
         if (keyMapSubjectInfo.containsKey(subjectInfo.symbol.key)) {
           // Delete old data on line
           final SubjectInfo prevSubjectInfo = keyMapSubjectInfo[subjectInfo.symbol.key]!;
@@ -132,6 +130,12 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
         }
       }
     }
+
+    for (var element in keyMapSubjectInfo.values) {
+      CacheInfoModel? cacheInfo = await _localSQLite.cacheInfoDao().findBySymbol(element.symbol.toString());
+      if (cacheInfo == null) result.add(element);
+    }
+
     return result;
   }
 

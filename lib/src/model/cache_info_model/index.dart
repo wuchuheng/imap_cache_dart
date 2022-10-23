@@ -23,9 +23,9 @@ class CacheInfoModel {
 class CacheInfo extends Table {
   TextColumn get key => text()();
   IntColumn get uid => integer()();
-  TextColumn get value => text().nullable()();
-  TextColumn get hash => text().nullable()();
-  TextColumn get symbol => text().nullable()();
+  TextColumn get value => text()();
+  TextColumn get hash => text()();
+  TextColumn get symbol => text()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
 

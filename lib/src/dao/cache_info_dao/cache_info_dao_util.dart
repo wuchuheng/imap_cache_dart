@@ -1,7 +1,20 @@
-import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:sqlite3/common.dart';
+import 'package:wuchuheng_imap_cache/src/dao/db.dart';
+import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 
 import '../../utils/timer_util.dart';
+
+CacheInfoModel cacheInfoDataToCacheInfoModel(CacheInfoData cacheInfoData) {
+  return CacheInfoModel(
+    updatedAt: cacheInfoData.updatedAt,
+    symbol: cacheInfoData.symbol,
+    value: cacheInfoData.value,
+    key: cacheInfoData.key,
+    hash: cacheInfoData.hash,
+    uid: cacheInfoData.uid,
+    deletedAt: cacheInfoData.deletedAt,
+  );
+}
 
 class CacheInfoDaoUtil {
   static CacheInfoModel rowConvertCacheInfoModel(Row row) {

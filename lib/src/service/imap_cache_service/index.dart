@@ -10,7 +10,6 @@ import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/db.dart';
-import '../../dao/local_sqlite.dart';
 import '../sync_service/index.dart';
 import '../sync_service/sync_service.dart';
 
@@ -32,9 +31,11 @@ class ImapCacheServiceI implements ImapCacheService {
   @override
   Future<ImapCacheService> connectToServer(ConnectConfig config) async {
     Logger.debugger = config.isDebug;
-    final _DB = DB(DBStoreDir: '${config.localCacheDirectory}/localCache/${config.userName}');
-    _localSQLite =
-        await LocalSQLite(_DB).init(userName: config.userName, localCacheDirectory: config.localCacheDirectory);
+    final _DB = DB(
+      DBStoreDir: '${config.localCacheDirectory}/localCache/${config.userName}',
+      logStatements: config.isDebug,
+    );
+    _localSQLite = LocalSQLite(_DB);
     _localCacheService = LocalCacheService(_localSQLite);
     _subscriptionImp = SubscriptionImp();
     _syncService = SyncServiceI(config, _localSQLite, this);
@@ -57,7 +58,7 @@ class ImapCacheServiceI implements ImapCacheService {
   Future<void> setWithFrom({required String key, required String value, required From from}) async {
     Logger.info('Before setting the cache. key:$key value: $value');
     value = await _subscriptionImp.beforeSetSubscribeConsume(key: key, value: value, from: from);
-    _localCacheService.set(key: key, value: value);
+    await _localCacheService.set(key: key, value: value);
     _subscriptionImp.afterSetSubscribeConsume(key: key, value: value, from: from);
     Logger.info('After setting the cache. key:$key value: $value');
   }

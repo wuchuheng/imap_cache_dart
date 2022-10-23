@@ -1,20 +1,19 @@
 import 'dart:async';
 
-import 'package:wuchuheng_imap_cache/src/dao/local_sqlite.dart';
 import 'package:wuchuheng_imap_cache/src/model/cache_info_model/index.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
+import '../../dao/db.dart';
 import '../../utils/symbol_util/cache_symbol_util.dart';
 import '../imap_cache_service/cache_abstract.dart';
 
 class LocalCacheService implements CacheAbstract {
-  /// todo delete
   final LocalSQLite _localSQLite;
   LocalCacheService(this._localSQLite);
 
   @override
   Future<String> get({required String key}) async {
-    CacheInfoModel? cacheInfoModel = _localSQLite.cacheInfoDao().findByKey(key: key);
+    CacheInfoModel? cacheInfoModel = await _localSQLite.cacheInfoDao().findByKey(key: key);
     if (cacheInfoModel == null) {
       Logger.error("Not found local cache.key: $key");
       throw Error();
@@ -24,7 +23,7 @@ class LocalCacheService implements CacheAbstract {
 
   @override
   Future<String?> has({required String key}) async {
-    final hasData = _localSQLite.cacheInfoDao().findByKey(key: key);
+    final hasData = await _localSQLite.cacheInfoDao().findByKey(key: key);
     if (hasData != null && hasData.deletedAt == null) return hasData.value;
     return null;
   }
@@ -43,16 +42,16 @@ class LocalCacheService implements CacheAbstract {
       key: key,
       hash: cacheSymbolUtil.hash,
     );
-    _localSQLite.cacheInfoDao().save(cacheInfo);
+    await _localSQLite.cacheInfoDao().save(cacheInfo);
     Logger.info('Complete local cache settings. key $key value: $value');
   }
 
   @override
   Future<void> unset({required String key}) async {
-    final hasData = _localSQLite.cacheInfoDao().findByKey(key: key);
+    final hasData = await _localSQLite.cacheInfoDao().findByKey(key: key);
     if (hasData != null) {
       hasData.deletedAt = DateTime.now();
-      _localSQLite.cacheInfoDao().save(hasData);
+      await _localSQLite.cacheInfoDao().save(hasData);
     }
   }
 }

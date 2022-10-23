@@ -2,6 +2,18 @@ import 'package:sqlite3/common.dart';
 
 import '../../model/online_cache_info_model/index.dart';
 import '../../utils/timer_util.dart';
+import '../db.dart';
+
+OnlineCacheInfoModel onlineCacheInfoDataToCacheInfoModel(OnlineCacheInfoData onlineCacheInfoData) {
+  return OnlineCacheInfoModel(
+    updatedAt: onlineCacheInfoData.updatedAt,
+    symbol: onlineCacheInfoData.symbol,
+    key: onlineCacheInfoData.key,
+    hash: onlineCacheInfoData.hash,
+    uid: onlineCacheInfoData.uid,
+    deletedAt: onlineCacheInfoData.deletedAt,
+  );
+}
 
 class OnlineCacheInfoDaoUtil {
   static OnlineCacheInfoModel rowConvertCacheInfoModel(Row row) {

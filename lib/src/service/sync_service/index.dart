@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
-import 'package:wuchuheng_imap_cache/src/dao/local_sqlite.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_client_service/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/imap_directory_service/index.dart';
 import 'package:wuchuheng_imap_cache/src/service/sync_service/sync_service.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
+import '../../dao/db.dart';
 import '../../dto/connect_config/index.dart';
 import '../imap_cache_service/index.dart';
 import 'IMAP_sync_service/index.dart';
@@ -15,7 +15,6 @@ import 'sync_event.dart';
 class SyncServiceI implements SyncService {
   late ImapDirectoryService _imapDirectoryService;
   final ConnectConfig _config;
-  // todo delete
   final LocalSQLite _localSQLite;
   final ImapCacheServiceI _imapCache;
   final beforeStartSubject = SubjectHook<Duration>();

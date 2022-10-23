@@ -1,10 +1,9 @@
 import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dart';
 
 abstract class OnlineCacheInfoDaoAbstract {
-  OnlineCacheInfoModel save(OnlineCacheInfoModel onlineCacheInfo);
-  OnlineCacheInfoModel? findByKey({required String key});
-  List<OnlineCacheInfoModel> fetch();
-  void destroyByUid(int uid);
-  void destroyAllData();
-  List<OnlineCacheInfoModel> fetchALLByKey(String keys);
+  Future<OnlineCacheInfoModel> save(OnlineCacheInfoModel onlineCacheInfo);
+  Future<OnlineCacheInfoModel?> findByKey({required String key});
+  Future<List<OnlineCacheInfoModel>> fetch();
+  Future<void> destroyByUid(int uid);
+  Future<List<OnlineCacheInfoModel>> fetchALLByKey(String keys);
 }

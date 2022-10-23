@@ -5,7 +5,7 @@ import 'package:wuchuheng_imap_cache/src/model/online_cache_info_model/index.dar
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../../../wuchuheng_imap_cache.dart';
-import '../../../dao/local_sqlite.dart';
+import '../../../dao/db.dart';
 import '../../imap_cache_service/index.dart';
 import '../../imap_directory_service/index.dart';
 import 'IMAP_sync_service.dart';
@@ -44,19 +44,20 @@ class IMAPSyncServiceI implements IMAPSyncService {
 
   @override
   Future<void> localSyncToOnline() async {
-    final localData = _localSQLite.cacheInfoDao().fetchLocal();
+    final localData = await _localSQLite.cacheInfoDao().fetchLocal();
     if (localData.isNotEmpty) onUpdate();
     for (final item in localData) {
       await _imapDirectoryService.createFile(fileName: item.symbol, content: item.value);
       Logger.info('Local -> online; key: ${item.key}; value: ${item.value}');
-      final onlineCacheList = _localSQLite.onlineCacheInfoDao().fetchALLByKey(item.key);
+      final List<OnlineCacheInfoModel> onlineCacheList =
+          await _localSQLite.onlineCacheInfoDao().fetchALLByKey(item.key);
       for (final onlineItem in onlineCacheList) {
         try {
           await _imapDirectoryService.deleteFileByUid(onlineItem.uid);
         } catch (e) {
           Logger.error('failed to delete online data. key: ${onlineItem.key}; symbol: ${onlineItem.symbol}');
         }
-        _localSQLite.onlineCacheInfoDao().destroyByUid(onlineItem.uid);
+        await _localSQLite.onlineCacheInfoDao().destroyByUid(onlineItem.uid);
       }
     }
     if (localData.isNotEmpty) onUpdated();
@@ -64,10 +65,10 @@ class IMAPSyncServiceI implements IMAPSyncService {
 
   @override
   Future<void> onlineSyncToLocal() async {
-    final List<OnlineCacheInfoModel> onlineCacheInfoList = _localSQLite.onlineCacheInfoDao().fetch();
+    final List<OnlineCacheInfoModel> onlineCacheInfoList = await _localSQLite.onlineCacheInfoDao().fetch();
     if (onlineCacheInfoList.isNotEmpty) onDownload();
     for (final onlineItem in onlineCacheInfoList) {
-      final localItem = _localSQLite.cacheInfoDao().findByKey(key: onlineItem.key);
+      final localItem = await _localSQLite.cacheInfoDao().findByKey(key: onlineItem.key);
       if (localItem != null) {
         final localTime = localItem.updatedAt.microsecondsSinceEpoch;
         final onlineTime = onlineItem.updatedAt.microsecondsSinceEpoch;
@@ -79,7 +80,7 @@ class IMAPSyncServiceI implements IMAPSyncService {
           }
         } else if (localTime == onlineTime && localItem.uid < onlineItem.uid) {
           localItem.uid = onlineItem.uid;
-          _localSQLite.cacheInfoDao().save(localItem);
+          await _localSQLite.cacheInfoDao().save(localItem);
         }
       } else {
         try {
@@ -113,11 +114,11 @@ class IMAPSyncServiceI implements IMAPSyncService {
     );
     if (onlineCacheInfoModel.deletedAt != null) {
       await _imapCache.unset(key: onlineCacheInfoModel.key);
-      _localSQLite.cacheInfoDao().save(cacheInfo);
+      await _localSQLite.cacheInfoDao().save(cacheInfo);
       Logger.info('Online -> local; Data synchronization; key: ${onlineCacheInfoModel.key} value: $value');
     } else {
       await _imapCache.setWithFrom(key: cacheInfo.key, value: value, from: From.online);
-      final CacheInfoModel localData = _localSQLite.cacheInfoDao().findByKey(key: onlineCacheInfoModel.key)!;
+      final CacheInfoModel localData = (await _localSQLite.cacheInfoDao().findByKey(key: onlineCacheInfoModel.key))!;
       localData.uid = onlineCacheInfoModel.uid;
       if (cacheInfo.value == value) {
         localData.hash = onlineCacheInfoModel.hash;
@@ -125,7 +126,7 @@ class IMAPSyncServiceI implements IMAPSyncService {
         localData.deletedAt = onlineCacheInfoModel.deletedAt;
         localData.symbol = onlineCacheInfoModel.symbol;
       }
-      _localSQLite.cacheInfoDao().save(localData);
+      await _localSQLite.cacheInfoDao().save(localData);
       Logger.info(
         'Online -> local; Synchronize online and delete local data; key: ${onlineCacheInfoModel.key} value: $value',
       );
@@ -145,7 +146,7 @@ class IMAPSyncServiceI implements IMAPSyncService {
         updatedAt: subject.symbol.updatedAt,
         deletedAt: subject.symbol.deletedAt,
       );
-      _localSQLite.onlineCacheInfoDao().save(onlineCacheInfoModel);
+      await _localSQLite.onlineCacheInfoDao().save(onlineCacheInfoModel);
     }
   }
 }
