@@ -7,7 +7,10 @@ import 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 void main() {
+  const testRuntimeDir = 'tmp';
   Future<ImapCacheService> getClient(String dir) async {
+    final file = '${Directory.current.path}/test/.env';
+    DotEnv(path: file);
     final config = ConnectConfig(
       isDebug: DotEnv.get('IS_DEBUG', true),
       userName: DotEnv.get('USER_NAME', ''),
@@ -25,49 +28,38 @@ void main() {
     return await ImapCache().connectToServer(config);
   }
 
-  Future<ImapCacheService> getClient1() async => await getClient('~/tmp/client1');
-  Future<ImapCacheService> getClient2() async => await getClient('~/tmp/client2');
+  Future<ImapCacheService> getClient1() => getClient('$testRuntimeDir/client1');
+  Future<ImapCacheService> getClient2() => getClient('$testRuntimeDir/client2');
+  Future<ImapCacheService> getClientForSyncTest() => getClient('$testRuntimeDir/clientForSyncTest');
+  Future<ImapCacheService> getClientForLog() => getClient('$testRuntimeDir/clientForLogTest');
+  Future<ImapCacheService> getClientForGetTest() => getClient('$testRuntimeDir/clientForGetTest');
+  Future<ImapCacheService> getClientForHasTest() => getClient('$testRuntimeDir/clientForHasTest');
+  Future<ImapCacheService> getClientForUnsetTest() => getClient('$testRuntimeDir/clientForUnsetTest');
+  Future<ImapCacheService> getClientForUpdateTest() => getClient('$testRuntimeDir/clientForUpdateTest');
+  Future<ImapCacheService> getClientForDownloadTest() => getClient('$testRuntimeDir/clientForDownloadTest');
+  Future<ImapCacheService> getClientForSyncIntervalTest() => getClient('$testRuntimeDir/clientForSyncIntervalTest');
 
   group('A group of tests', () {
-    late ImapCacheService imapCache;
     final key = 'hello';
     final value = 'hello';
 
-    test('Init', () async {
-      final file = '${Directory.current.path}/test/.env';
-      DotEnv(path: file);
-      final directory = DotEnv.get('LOCAL_CACHE_DIRECTORY', '');
-      final path = '$directory/localCache';
-      if (await Directory(path).exists()) {
-        await Directory(path).delete(recursive: true);
-        Logger.info('the directory $path has been deleted');
-      }
-      final config = ConnectConfig(
-        isDebug: DotEnv.get('IS_DEBUG', true),
-        userName: DotEnv.get('USER_NAME', ''),
-        password: DotEnv.get('PASSWORD', ''),
-        imapServerHost: DotEnv.get('HOST', ''),
-        imapServerPort: int.parse(DotEnv.get('PORT', '')),
-        isImapServerSecure: DotEnv.get('TLS', true),
-        boxName: DotEnv.get('BOX_NAME', ''),
-        localCacheDirectory: DotEnv.get('LOCAL_CACHE_DIRECTORY', ''),
-      );
-      imapCache = await ImapCache().connectToServer(config);
-    });
-    test('Sync subject test', () {
+    test('Sync event test', () async {
       late Duration beforeDuration;
       late Duration afterDuration;
-      imapCache.beforeSync((value) => beforeDuration = value);
-      imapCache.afterSync((value) => afterDuration = value);
-      Timer(Duration(seconds: 50), () {
-        expect(beforeDuration != null, isTrue);
-        expect(afterDuration != null, isTrue);
-      });
+      ImapCacheService client = await getClientForSyncTest();
+      client.beforeSync((value) => beforeDuration = value);
+      client.afterSync((value) => afterDuration = value);
+      await client.set(key: 'SyncEventTest', value: DateTime.now().toString());
+      await Future.delayed(Duration(seconds: 10));
+      expect(beforeDuration != null, isTrue);
+      expect(afterDuration != null, isTrue);
+      client.disconnect();
     });
-    test('SubjectLog test', () async {
+    test('Log test', () async {
       late LoggerItem loggerItem;
-      imapCache.subscribeLog((value) => loggerItem = value);
-      await imapCache.set(key: 'hello', value: 'hello');
+      final ImapCacheService client = await getClientForLog();
+      client.subscribeLog((value) => loggerItem = value);
+      await client.set(key: 'hello', value: 'hello');
       expect(loggerItem != null, isTrue);
     });
     test('Test event for afterSet and beforeSet.', () async {
@@ -120,31 +112,39 @@ void main() {
     });
 
     test('GET Test', () async {
-      final result = await imapCache.get(key: key);
+      final ImapCacheService client = await getClientForGetTest();
+      await client.set(key: key, value: value);
+      final result = await client.get(key: key);
       expect(result, value);
+      client.disconnect();
     });
+
     test('Has Test', () async {
-      expect(await imapCache.has(key: key), value);
-      String? result = await imapCache.has(key: 'noneKey');
+      final ImapCacheService client = await getClientForHasTest();
+      await client.set(key: key, value: value);
+      expect(await client.has(key: key), value);
+      String? result = await client.has(key: 'noneKey');
       expect(result, isNull);
+      client.disconnect();
     });
     test('Unset and beforeUnset afterUnset Test', () async {
       bool callback1 = false;
       bool callback2 = false;
-      imapCache.beforeUnset(callback: ({required String key}) async {
+      final ImapCacheService client = await getClientForUnsetTest();
+      client.beforeUnset(callback: ({required String key}) async {
         callback1 = true;
         return true;
       });
-      imapCache.beforeUnset(callback: ({required String key}) async {
+      client.beforeUnset(callback: ({required String key}) async {
         callback2 = true;
         return true;
       });
       String afterUnsetKey = '';
-      imapCache.afterUnset(callback: ({required key}) async {
+      client.afterUnset(callback: ({required key}) async {
         afterUnsetKey = key;
       });
-      await imapCache.unset(key: key);
-      expect(await imapCache.has(key: key), isNull);
+      await client.unset(key: key);
+      expect(await client.has(key: key), isNull);
       expect(callback1, isTrue);
       expect(callback2, isTrue);
       expect(afterUnsetKey, key);
@@ -154,41 +154,52 @@ void main() {
       final syncIntervalSeconds = 5;
       bool isUpdate = false;
       bool isCompleteUpdate = false;
-      imapCache.onUpdate(() => isUpdate = true);
-      imapCache.onUpdated(() => isCompleteUpdate = true);
-      imapCache.setSyncInterval(syncIntervalSeconds);
-      imapCache.set(key: 'testForOnUpdateEvent', value: 'testForOnUpdateEvent');
+      final ImapCacheService client = await getClientForUpdateTest();
+      client.onUpdate(() => isUpdate = true);
+      client.onUpdated(() => isCompleteUpdate = true);
+      client.setSyncInterval(syncIntervalSeconds);
+      await client.set(key: 'testForOnUpdateEvent', value: 'testForOnUpdateEvent');
       await Future.delayed(Duration(seconds: 10));
       expect(isUpdate, true);
       expect(isCompleteUpdate, true);
     }, timeout: Timeout(Duration(seconds: 12)));
 
-    test('Event test for onDownload and onDownloaded.', () async {
-      bool isDownload = false;
-      bool isDownloaded = false;
-      imapCache.onDownload(() => isDownload = true);
-      imapCache.onDownloaded(() => isDownloaded = true);
-      final client1 = await getClient1();
-      client1.set(key: 'tmp', value: DateTime.now().toString());
-      await Future.delayed(Duration(seconds: 10));
-      expect(isDownload, true);
-      expect(isDownloaded, true);
-      client1.disconnect();
-    }, timeout: Timeout(Duration(seconds: 12)));
-
     test('setSyncInterval test', () async {
       final syncIntervalSeconds = 20;
       late int expectValue;
-      imapCache.beforeSync((duration) {
+      final ImapCacheService client = await getClientForSyncIntervalTest();
+      client.beforeSync((duration) {
         expectValue = duration.inSeconds;
       });
-      imapCache.setSyncInterval(syncIntervalSeconds);
+      client.setSyncInterval(syncIntervalSeconds);
       await Future.delayed(Duration(seconds: syncIntervalSeconds * 2));
       expect(syncIntervalSeconds, expectValue);
     }, timeout: Timeout(Duration(seconds: 41)));
-    test('Dispose', () async {
-      const dir = '~/';
-      if (Directory(dir).existsSync()) Directory(dir).delete(recursive: true);
+  });
+
+  group('A group of tests for download events', () {
+    const downloadTestSeconds = 10;
+    test('Init', () async {
+      final client1 = await getClient1();
+      await client1.set(key: 'tmp', value: DateTime.now().toString());
+      await Future.delayed(Duration(seconds: 10));
+      client1.disconnect();
     });
+
+    test('Event test for onDownload and onDownloaded.', () async {
+      bool isDownload = false;
+      bool isDownloaded = false;
+      final ImapCacheService client = await getClientForDownloadTest();
+      client.onDownload(() {
+        isDownload = true;
+      });
+      client.onDownloaded(() {
+        isDownloaded = true;
+      });
+      await Future.delayed(Duration(seconds: downloadTestSeconds));
+      expect(isDownload, true);
+      expect(isDownloaded, true);
+      client.disconnect();
+    }, timeout: Timeout(Duration(seconds: downloadTestSeconds + 1)));
   });
 }
