@@ -102,3 +102,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.10
 
 - chore: update sqlite3 version.
+
+## 1.0.11
+
+- refactor: refactoring the database with drift.
