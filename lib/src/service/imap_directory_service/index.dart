@@ -97,6 +97,7 @@ class ImapDirectoryService implements ImapDirectoryServiceAbstract {
     final FetchImapResult onlineData = await client.uidFetchMessages(sequence, 'BODY.PEEK[HEADER.FIELDS (subject)]');
     final List<SubjectInfo> result = [];
     Map<String, SubjectInfo> keyMapSubjectInfo = {};
+    onlineData.messages.removeAt(0);
     for (final message in onlineData.messages) {
       message.sequenceId;
       String? symbol = message.getHeaderValue('Subject');

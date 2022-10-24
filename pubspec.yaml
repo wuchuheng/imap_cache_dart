@@ -1,6 +1,6 @@
 name: wuchuheng_imap_cache
 description: wuchuheng_imap_cache is a data-driven caching library based on the IMAP protocol.
-version: 1.0.11
+version: 1.0.12
 homepage: https://github.com/wuchuheng/imap_cache_dart
 
 environment:
