@@ -107,6 +107,6 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 - refactor: refactoring the database with drift.
 
-## 1.0.11
+## 1.0.12
 
 - refactor: refactoring the database with drift.
