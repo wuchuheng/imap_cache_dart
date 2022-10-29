@@ -114,3 +114,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.13
 
 - fix: fix the issue of sync data from online.
+
+## 1.0.14
+
+- feat: disconnect and reconnect feature.
