@@ -16,7 +16,7 @@ class SyncServiceI implements SyncService {
   late ImapDirectoryService _imapDirectoryService;
   final ConnectConfig _config;
   final LocalSQLite _localSQLite;
-  final ImapCacheServiceI _imapCache;
+  late final ImapCacheServiceI _imapCache;
   final beforeStartSubject = SubjectHook<Duration>();
   final afterCompletedSubject = SubjectHook<Duration>();
   final onUpdateSubject = SubjectHook<void>();
@@ -78,12 +78,16 @@ class SyncServiceI implements SyncService {
         ).start();
         afterCompletedSubject.next(Duration(seconds: _syncIntervalSeconds));
       } catch (e, stack) {
-        // TODO 需要重新连接
-        if (e == null) {
-          // 需要重新连接
-        }
         Logger.error(e.toString());
-        print(stack);
+        try {
+          Logger.info('Try to re-establish the connection.');
+          _imapCache.disconnect();
+          await Future.delayed(Duration(seconds: 1));
+          await _imapCache.connectToServer(_config);
+        } catch (e) {
+          Logger.error('Retry connection failed.');
+          // TODO: the callback that triggered the connection failure is reported here.
+        }
       }
       await Future.delayed(Duration(seconds: _syncIntervalSeconds));
       await syncData();
