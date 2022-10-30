@@ -158,7 +158,7 @@ class ImapCache implements ImapCacheService {
 
   @override
   Unsubscribe subscribeLog(void Function(LoggerItem loggerItem) callback) {
-    final result = _subjectHook.subscribe((value) => callback(value));
+    final result = _subjectHook.subscribe((value, _) => callback(value));
     final channel = task.createChannel(name: ChannelName.subjectLog.name);
     channel.listen((message, channel) async {
       Map<String, dynamic> mapData = jsonDecode(message);

@@ -100,7 +100,7 @@ class ImapCacheServiceI implements ImapCacheService {
 
   @override
   hook.Unsubscribe subscribeLog(void Function(LoggerItem loggerItem) callback) {
-    final subscribe = Logger.subscribe((value) {
+    final subscribe = Logger.subscribe((value, _) {
       callback(value);
     });
 
@@ -117,23 +117,25 @@ class ImapCacheServiceI implements ImapCacheService {
   }
 
   @override
-  hook.Unsubscribe afterSync(void Function(Duration duration) callback) => afterSyncSubject.subscribe(callback);
+  hook.Unsubscribe afterSync(void Function(Duration duration) callback) =>
+      afterSyncSubject.subscribe((v, _) => callback(v));
 
   @override
-  hook.Unsubscribe beforeSync(void Function(Duration duration) callback) => beforeSyncSubject.subscribe(callback);
+  hook.Unsubscribe beforeSync(void Function(Duration duration) callback) =>
+      beforeSyncSubject.subscribe((v, _) => callback(v));
 
   @override
   Future<void> setSyncInterval(int second) async => await _syncService.setSyncInterval(second);
 
   @override
-  hook.Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value) => callback());
+  hook.Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value, _) => callback());
 
   @override
-  hook.Unsubscribe onUpdated(void Function() callback) => onCompleteUpdateSubject.subscribe((value) => callback());
+  hook.Unsubscribe onUpdated(void Function() callback) => onCompleteUpdateSubject.subscribe((value, _) => callback());
 
   @override
-  hook.Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value) => callback());
+  hook.Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value, _) => callback());
 
   @override
-  hook.Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value) => callback());
+  hook.Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value, _) => callback());
 }

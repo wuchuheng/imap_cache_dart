@@ -122,3 +122,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.15
 
 - chore: update pubspec.yaml
+
+## 1.0.16
+
+- feat: update dependencies.

@@ -108,27 +108,25 @@ class SyncServiceI implements SyncService {
   }
 
   @override
-  Unsubscribe afterSync(AfterSyncCallback callback) => afterCompletedSubject.subscribe(callback);
+  Unsubscribe afterSync(AfterSyncCallback callback) => afterCompletedSubject.subscribe((v, _) => callback(v));
 
   @override
   Unsubscribe beforeSync(BeforeSyncCallback callback) {
-    return beforeStartSubject.subscribe((value) {
-      callback(value);
-    });
+    return beforeStartSubject.subscribe((value, cancel) => callback(value));
   }
 
   @override
   Future<void> setSyncInterval(int second) async => _syncIntervalSeconds = second;
 
   @override
-  Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value) => callback());
+  Unsubscribe onUpdate(void Function() callback) => onUpdateSubject.subscribe((value, _) => callback());
 
   @override
-  Unsubscribe onUpdated(void Function() callback) => onUpdatedSubject.subscribe((value) => callback());
+  Unsubscribe onUpdated(void Function() callback) => onUpdatedSubject.subscribe((value, _) => callback());
 
   @override
-  Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value) => callback());
+  Unsubscribe onDownload(void Function() callback) => onDownloadSubject.subscribe((value, _) => callback());
 
   @override
-  Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value) => callback());
+  Unsubscribe onDownloaded(void Function() callback) => onDownloadedSubject.subscribe((value, _) => callback());
 }
