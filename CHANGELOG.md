@@ -118,3 +118,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.14
 
 - feat: disconnect and reconnect feature.
+
+## 1.0.15
+
+- chore: update pubspec.yaml
