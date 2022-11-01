@@ -55,6 +55,8 @@ class SyncServiceI implements SyncService {
   /// Start synchronizing data
   @override
   Future<void> start() async {
+    // /// TODO: must be deleted
+    // return;
     _isRunning = true;
     Completer<void> completer = Completer();
     if (!_isInit) {

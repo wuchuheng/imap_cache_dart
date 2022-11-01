@@ -146,6 +146,7 @@ void onSubjectLog(ChannelAbstract channel, ImapCacheServiceI imapCacheService, S
   channel.onClose((name) => unsubscribe.unsubscribe());
 }
 
+Map<int, SubjectHook<void>> idMapAfterSet = {};
 void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterSetChannelId.contains(channel.channelId)) {
     final String? key = message.isEmpty ? null : message;
@@ -153,21 +154,21 @@ void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, Str
     final subscribe = imapCacheService.afterSet(
         key: key,
         callback: ({required key, required value, required hash, required from}) async {
-          final subject = SubjectHook<void>();
-          final listen = channel.listen((message, channel) async {
-            subject.next(null);
-          });
+          idMapAfterSet[channel.channelId] = SubjectHook<void>();
           channel.send(jsonEncode(CallbackData(key: key, value: value, hash: hash, from: from)));
-          await subject.toFuture();
-          listen.cancel();
+          await idMapAfterSet[channel.channelId]?.toFuture();
         });
     channel.onClose((name) {
       afterSetChannelId.remove(channel.channelId);
       subscribe.unsubscribe();
+      idMapAfterSet.removeWhere((key, value) => key == channel.channelId);
     });
+  } else {
+    idMapAfterSet[channel.channelId]?.next(null);
   }
 }
 
+Map<int, Completer<void>> idMapUnset = {};
 void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterUnsetChannelId.contains(channel.channelId)) {
     afterUnsetChannelId.add(channel.channelId);
@@ -175,65 +176,64 @@ void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String
     final subscribe = imapCacheService.afterUnset(
         key: key,
         callback: ({required key}) async {
-          Completer<void> completer = Completer();
-          final listen = channel.listen((message, channel) async {
-            completer.complete(null);
-          });
+          idMapUnset[channel.channelId] = Completer();
           channel.send(key);
-          await completer.future;
-          listen.cancel();
+          await idMapUnset[channel.channelId]?.future;
         });
     channel.onClose((name) {
       afterUnsetChannelId.remove(channel.channelId);
       subscribe.unsubscribe();
+      idMapUnset.removeWhere((key, value) => key == channel.channelId);
     });
+  } else {
+    idMapUnset[channel.channelId]?.complete(null);
   }
 }
 
+Map<int, SubjectHook<CallbackData>> idMapBeforeSet = {};
 void onBeforeSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeSetChannelId.contains(channel.channelId)) {
     beforeSetChannelId.add(channel.channelId);
     final subscribe = imapCacheService.beforeSet(
       key: message.isEmpty ? null : message,
       callback: ({required String key, required String value, required String hash, required From from}) async {
-        final subject = SubjectHook<CallbackData>();
-        final listen = channel.listen((message, channel) async {
-          final callbackData = CallbackData.fromJson(jsonDecode(message));
-          subject.next(callbackData);
-        });
+        idMapBeforeSet[channel.channelId] = SubjectHook<CallbackData>();
         channel.send(jsonEncode(CallbackData(key: key, value: value, hash: hash, from: from)));
-        final callData = await subject.toFuture();
-        listen.cancel();
+        final callData = await idMapBeforeSet[channel.channelId]!.toFuture();
         return callData.value;
       },
     );
     channel.onClose((name) {
       beforeSetChannelId.remove(channel.channelId);
       subscribe.unsubscribe();
+      idMapBeforeSet.removeWhere((key, value) => key == channel.channelId);
     });
+  } else {
+    final callbackData = CallbackData.fromJson(jsonDecode(message));
+    idMapBeforeSet[channel.channelId]?.next(callbackData);
   }
 }
 
+Map<int, SubjectHook<bool>> idMapBeforeUnSet = {};
 void onBeforeUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeUnsetChannelId.contains(channel.channelId)) {
     beforeUnsetChannelId.add(channel.channelId);
     final subscribe = imapCacheService.beforeUnset(
       key: message.isEmpty ? null : message,
       callback: ({required String key}) async {
-        final boolSubject = SubjectHook<bool>();
-        final listen = channel.listen((message, channel) async {
-          final result = ResultData.fromJson(jsonDecode(message));
-          boolSubject.next(result.result);
-        });
+        idMapBeforeUnSet[channel.channelId] = SubjectHook<bool>();
         channel.send(key);
-        final result = await boolSubject.toFuture();
-        listen.cancel();
+        final result = await idMapBeforeUnSet[channel.channelId]!.toFuture();
         return result;
       },
     );
     channel.onClose((name) {
       subscribe.unsubscribe();
       beforeUnsetChannelId.remove(channel.channelId);
+      idMapBeforeUnSet.removeWhere((key, value) => key == channel.channelId);
     });
+  } else {
+    final ResultData result = ResultData.fromJson(jsonDecode(message));
+    idMapBeforeUnSet[channel.channelId]?.next(result.result);
   }
 }

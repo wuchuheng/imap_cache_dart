@@ -126,3 +126,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.16
 
 - feat: update dependencies.
+
+## 1.0.17
+
+- refactor: 
