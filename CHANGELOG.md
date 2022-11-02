@@ -134,3 +134,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.18
 
 - fix: fix the issue that the same id may cause an error due to concurrency.
+
+## 1.0.19
+
+- chore: update hook dependence.
