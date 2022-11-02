@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:wuchuheng_hooks/wuchuheng_hooks.dart';
 import 'package:wuchuheng_imap_cache/src/subscription/subscription_abstract.dart';
 
@@ -5,18 +6,18 @@ import '../utils/hash.dart';
 import 'cache_subscribe_consumer_abstract.dart';
 
 class SubscriptionImp implements SubscriptionAbstract, CacheSubscribeConsumerAbstract {
-  final Map<String, Map<int, BeforeSetCallback>> _beforeSetSubscribeRegister = {};
-  final Map<int, BeforeSetCallback> _globalBeforeSetSubscribeRegister = {};
-  final Map<String, Map<int, AfterSetCallback>> _afterSetSubscribeRegister = {};
-  final Map<int, AfterSetCallback> _globalAfterSetSubscribeRegister = {};
-  final Map<String, Map<int, BeforeUnsetCallback>> _beforeUnsetSubscribeRegister = {};
-  final Map<int, BeforeUnsetCallback> _globalBeforeUnsetSubscribeRegister = {};
-  final Map<String, Map<int, AfterUnsetCallback>> _afterUnsetSubscribeRegister = {};
-  final Map<int, AfterUnsetCallback> _globalAfterUnsetSubscribeRegister = {};
+  final Map<String, Map<String, BeforeSetCallback>> _beforeSetSubscribeRegister = {};
+  final Map<String, BeforeSetCallback> _globalBeforeSetSubscribeRegister = {};
+  final Map<String, Map<String, AfterSetCallback>> _afterSetSubscribeRegister = {};
+  final Map<String, AfterSetCallback> _globalAfterSetSubscribeRegister = {};
+  final Map<String, Map<String, BeforeUnsetCallback>> _beforeUnsetSubscribeRegister = {};
+  final Map<String, BeforeUnsetCallback> _globalBeforeUnsetSubscribeRegister = {};
+  final Map<String, Map<String, AfterUnsetCallback>> _afterUnsetSubscribeRegister = {};
+  final Map<String, AfterUnsetCallback> _globalAfterUnsetSubscribeRegister = {};
 
   @override
   Unsubscribe afterSet({String? key, required AfterSetCallback callback}) {
-    final id = DateTime.now().microsecondsSinceEpoch;
+    final String id = Uuid().v4();
     if (key != null) {
       if (_afterSetSubscribeRegister.containsKey(key)) _afterSetSubscribeRegister[key] = {};
       _afterSetSubscribeRegister[key]![id] = callback;
@@ -35,7 +36,7 @@ class SubscriptionImp implements SubscriptionAbstract, CacheSubscribeConsumerAbs
 
   @override
   Unsubscribe beforeSet({String? key, required BeforeSetCallback callback}) {
-    final id = DateTime.now().microsecondsSinceEpoch;
+    final String id = Uuid().v4();
     if (key != null) {
       if (!_beforeSetSubscribeRegister.containsKey(key)) _beforeSetSubscribeRegister[key] = {};
       _beforeSetSubscribeRegister[key]![id] = callback;
@@ -54,7 +55,7 @@ class SubscriptionImp implements SubscriptionAbstract, CacheSubscribeConsumerAbs
 
   @override
   Unsubscribe beforeUnset({String? key, required BeforeUnsetCallback callback}) {
-    final id = DateTime.now().microsecondsSinceEpoch;
+    final String id = Uuid().v4();
     if (key != null) {
       if (!_beforeUnsetSubscribeRegister.containsKey(key)) _beforeUnsetSubscribeRegister[key] = {};
       _beforeUnsetSubscribeRegister[key]![id] = callback;
@@ -73,7 +74,7 @@ class SubscriptionImp implements SubscriptionAbstract, CacheSubscribeConsumerAbs
 
   @override
   Unsubscribe afterUnset({String? key, required AfterUnsetCallback callback}) {
-    final id = DateTime.now().microsecondsSinceEpoch;
+    final String id = Uuid().v4();
     if (key != null) {
       if (_afterUnsetSubscribeRegister.containsKey(key)) _afterUnsetSubscribeRegister[key] = {};
       _afterUnsetSubscribeRegister[key]![id] = callback;

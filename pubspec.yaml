@@ -1,6 +1,6 @@
 name: wuchuheng_imap_cache
 description: wuchuheng_imap_cache is a data-driven caching library based on the IMAP protocol.
-version: 1.0.17
+version: 1.0.18
 homepage: https://github.com/wuchuheng/imap_cache_dart
 
 environment:
@@ -14,13 +14,14 @@ dependencies:
   crypto: ^3.0.2
   wuchuheng_logger: ^1.0.5
   rxdart: ^0.27.5
-  wuchuheng_isolate_channel: ^0.0.17
+  wuchuheng_isolate_channel: ^0.0.18
   wuchuheng_hooks: ^0.0.7
   drift: ^2.2.0
   sqlite3_flutter_libs: ^0.5.0
   path_provider: ^2.0.0
   path: ^1.8.2
   sqlite3: ^1.9.1
+  uuid: ^3.0.6
 
 dev_dependencies:
   lints: ^2.0.0

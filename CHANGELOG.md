@@ -129,4 +129,8 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 
 ## 1.0.17
 
-- refactor: 
+- refactor: refactoring the code.
+
+## 1.0.18
+
+- fix: fix the issue that the same id may cause an error due to concurrency.

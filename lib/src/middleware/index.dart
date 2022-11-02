@@ -19,10 +19,10 @@ T enumFromString<T>(List<T> values, String value) {
   return values.firstWhere((v) => v.toString().split('.')[1] == value);
 }
 
-List<int> beforeUnsetChannelId = [];
-List<int> beforeSetChannelId = [];
-List<int> afterUnsetChannelId = [];
-List<int> afterSetChannelId = [];
+List<String> beforeUnsetChannelId = [];
+List<String> beforeSetChannelId = [];
+List<String> afterUnsetChannelId = [];
+List<String> afterSetChannelId = [];
 
 Future<Task> middleware() async {
   ImapCacheServiceI imapCacheService = ImapCacheServiceI();
@@ -146,7 +146,7 @@ void onSubjectLog(ChannelAbstract channel, ImapCacheServiceI imapCacheService, S
   channel.onClose((name) => unsubscribe.unsubscribe());
 }
 
-Map<int, SubjectHook<void>> idMapAfterSet = {};
+Map<String, SubjectHook<void>> idMapAfterSet = {};
 void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterSetChannelId.contains(channel.channelId)) {
     final String? key = message.isEmpty ? null : message;
@@ -168,7 +168,7 @@ void onAfterSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, Str
   }
 }
 
-Map<int, Completer<void>> idMapUnset = {};
+Map<String, Completer<void>> idMapUnset = {};
 void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!afterUnsetChannelId.contains(channel.channelId)) {
     afterUnsetChannelId.add(channel.channelId);
@@ -190,7 +190,7 @@ void onUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String
   }
 }
 
-Map<int, SubjectHook<CallbackData>> idMapBeforeSet = {};
+Map<String, SubjectHook<CallbackData>> idMapBeforeSet = {};
 void onBeforeSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeSetChannelId.contains(channel.channelId)) {
     beforeSetChannelId.add(channel.channelId);
@@ -214,7 +214,7 @@ void onBeforeSet(ChannelAbstract channel, ImapCacheServiceI imapCacheService, St
   }
 }
 
-Map<int, SubjectHook<bool>> idMapBeforeUnSet = {};
+Map<String, SubjectHook<bool>> idMapBeforeUnSet = {};
 void onBeforeUnset(ChannelAbstract channel, ImapCacheServiceI imapCacheService, String message) {
   if (!beforeUnsetChannelId.contains(channel.channelId)) {
     beforeUnsetChannelId.add(channel.channelId);
