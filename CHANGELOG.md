@@ -138,3 +138,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.19
 
 - chore: update hook dependence.
+
+## 1.0.20
+
+- chore: update isolate_channel dependence.
