@@ -7,7 +7,7 @@ import 'package:wuchuheng_imap_cache/src/dto/before_unset/result_data/index.dart
 import 'package:wuchuheng_imap_cache/src/dto/callback_data/index.dart';
 import 'package:wuchuheng_imap_cache/src/dto/channel_name.dart';
 import 'package:wuchuheng_imap_cache/src/dto/set_data/index.dart';
-import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/index.dart';
+import 'package:wuchuheng_imap_cache/src/service/imap_cache_service/imap_cache_service.dart';
 import 'package:wuchuheng_isolate_channel/wuchuheng_isolate_channel.dart';
 
 import '../../wuchuheng_imap_cache.dart';

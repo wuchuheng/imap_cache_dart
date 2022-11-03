@@ -39,7 +39,7 @@ import ` 'package:wuchuheng_imap_cache/wuchuheng_imap_cache.dart'`;
 ## Usage
 
 ```dart
-import 'package:wuchuheng_imap_cache/index.dart';
+import 'package:wuchuheng_imap_cache/sync_service.dart';
 
 void main() async {
   final ImapCache cacheServiceInstance = await ImapCache().connectToServer(

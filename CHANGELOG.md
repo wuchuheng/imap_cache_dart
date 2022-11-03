@@ -142,3 +142,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.20
 
 - chore: update isolate_channel dependence.
+
+## 1.0.21
+
+- feat: add refreshed feature for sync task.

@@ -10,8 +10,8 @@ import 'package:wuchuheng_imap_cache/src/subscription/subscription_imp.dart';
 import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../dao/db.dart';
-import '../sync_service/index.dart';
 import '../sync_service/sync_service.dart';
+import '../sync_service/sync_service_abstract.dart';
 
 class ImapCacheServiceI implements ImapCacheService {
   hook.SubjectHook<Duration> afterSyncSubject = hook.SubjectHook();
@@ -60,6 +60,7 @@ class ImapCacheServiceI implements ImapCacheService {
     value = await _subscriptionImp.beforeSetSubscribeConsume(key: key, value: value, from: from);
     await _localCacheService.set(key: key, value: value);
     _subscriptionImp.afterSetSubscribeConsume(key: key, value: value, from: from);
+    if (from == From.local) _syncService.refresh();
     Logger.info('After setting the cache. key:$key value: $value');
   }
 

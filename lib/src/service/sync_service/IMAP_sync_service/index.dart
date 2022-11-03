@@ -6,7 +6,7 @@ import 'package:wuchuheng_logger/wuchuheng_logger.dart';
 
 import '../../../../wuchuheng_imap_cache.dart';
 import '../../../dao/db.dart';
-import '../../imap_cache_service/index.dart';
+import '../../imap_cache_service/imap_cache_service.dart';
 import '../../imap_directory_service/index.dart';
 import 'IMAP_sync_service.dart';
 
