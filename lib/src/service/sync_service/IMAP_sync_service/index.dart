@@ -112,6 +112,12 @@ class IMAPSyncServiceI implements IMAPSyncService {
       key: onlineCacheInfoModel.key,
       hash: onlineCacheInfoModel.hash,
     );
+    //
+    if (_imapCache.keyMapUpdatedAt.containsKey(onlineCacheInfoModel.key) &&
+        _imapCache.keyMapUpdatedAt[onlineCacheInfoModel.key]!.microsecondsSinceEpoch >
+            onlineCacheInfoModel.updatedAt.microsecondsSinceEpoch) {
+      return;
+    }
     if (onlineCacheInfoModel.deletedAt != null) {
       await _imapCache.unset(key: onlineCacheInfoModel.key);
       await _localSQLite.cacheInfoDao().save(cacheInfo);

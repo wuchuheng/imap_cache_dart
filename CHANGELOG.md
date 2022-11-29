@@ -146,3 +146,7 @@ _ feat: extended 2 parameters: hasLocalCache and hasOnlineCache in the connector
 ## 1.0.21
 
 - feat: add refreshed feature for sync task.
+
+## 1.0.22
+
+- fix: fix the issue that the latest local modification is overwritten by online.

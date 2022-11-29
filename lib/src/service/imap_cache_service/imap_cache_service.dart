@@ -26,6 +26,7 @@ class ImapCacheServiceI implements ImapCacheService {
   late SubscriptionImp _subscriptionImp;
   late LocalSQLite _localSQLite;
   late SyncService _syncService;
+  Map<String, DateTime> keyMapUpdatedAt = {};
 
   /// connect to the IMAP server with user's account
   @override
@@ -58,8 +59,10 @@ class ImapCacheServiceI implements ImapCacheService {
   Future<void> setWithFrom({required String key, required String value, required From from}) async {
     Logger.info('Before setting the cache. key:$key value: $value');
     value = await _subscriptionImp.beforeSetSubscribeConsume(key: key, value: value, from: from);
-    await _localCacheService.set(key: key, value: value);
+    final DateTime updatedAt = DateTime.now();
+    await _localCacheService.set(key: key, value: value, updatedAt: updatedAt);
     _subscriptionImp.afterSetSubscribeConsume(key: key, value: value, from: from);
+    keyMapUpdatedAt[key] = updatedAt;
     if (from == From.local) _syncService.refresh();
     Logger.info('After setting the cache. key:$key value: $value');
   }
@@ -71,8 +74,10 @@ class ImapCacheServiceI implements ImapCacheService {
       Logger.info('Failed to unset key: $key');
       return false;
     }
-    _localCacheService.unset(key: key);
+    final DateTime deletedAt = DateTime.now();
+    await _localCacheService.unset(key: key, deletedAt: deletedAt);
     _subscriptionImp.afterUnsetSubscribeConsume(key: key);
+    keyMapUpdatedAt[key] = deletedAt;
     Logger.info('After unsetting the cache. key:$key');
     return true;
   }

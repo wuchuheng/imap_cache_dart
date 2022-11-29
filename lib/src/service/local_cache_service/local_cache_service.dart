@@ -29,9 +29,9 @@ class LocalCacheService implements CacheAbstract {
   }
 
   @override
-  Future<void> set({required String key, required String value}) async {
+  Future<void> set({required String key, required String value, DateTime? updatedAt}) async {
     Logger.info('Start setting up local cache. key: $key value: $value');
-    final updatedAt = DateTime.now();
+    updatedAt = updatedAt ?? DateTime.now();
     final cacheSymbolUtil = CacheSymbolUtil(updatedAt: updatedAt, key: key, value: value);
     String symbol = cacheSymbolUtil.toString();
     final cacheInfo = CacheInfoModel(
@@ -47,10 +47,10 @@ class LocalCacheService implements CacheAbstract {
   }
 
   @override
-  Future<void> unset({required String key}) async {
+  Future<void> unset({required String key, DateTime? deletedAt}) async {
     final hasData = await _localSQLite.cacheInfoDao().findByKey(key: key);
     if (hasData != null) {
-      hasData.deletedAt = DateTime.now();
+      hasData.deletedAt = deletedAt ?? DateTime.now();
       await _localSQLite.cacheInfoDao().save(hasData);
     }
   }
